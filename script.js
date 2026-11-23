@@ -1,4 +1,4 @@
-/* MIDNIGHT OPERATOR 0.2.0 — standalone Wallpaper Engine web wallpaper.
+/* MIDNIGHT OPERATOR 0.2.1 — standalone Wallpaper Engine web wallpaper.
  * No remote scripts, analytics, network calls or artificial music animation.
  * Audio samples and media metadata come ONLY from Wallpaper Engine callbacks.
  * Diagnostic UI distinguishes callback registration from receiving real samples.
@@ -15,15 +15,14 @@
   const settings = {
     rain: true, rainAmount: 68, hud: true, calendar: true,
     projects: true, music: true, scanlines: true, reducedMotion: false,
-    panelScale: 108, audioSensitivity: 110, diagnostics: false,
+    panelScale: 108, audioSensitivity: 125, visualIntensity: 125, bassBoost: 125, diagnostics: false, showMilestone: true,
     milestoneDate: '', milestoneName: 'MILESTONE'
   };
 
   let width = 1, height = 1, dpr = 1, rainDrops = [], paused = false;
   let renderFpsCap = 30, previousFrame = 0, drawnFrames = 0, renderFps = 0;
   let fpsMeasuredAt = performance.now();
-  const audioLevels = new Float32Array(64);
-  const filteredBars = new Float32Array(40);
+  const audioEngine = new window.MidnightAudioEngine(40);
   let registeredAudio = false;
   let audioCallbacks = 0, lastAudioAt = -Infinity, audioPeak = 0;
   let hasMedia = false, lastAudioUiAt = 0, lastDiagAt = 0;
@@ -42,6 +41,7 @@
     document.documentElement.style.setProperty('--panel-scale', String(clamp(settings.panelScale, 90, 120) / 100));
     $('diagnostics').hidden = !settings.diagnostics;
     $('rain').style.display = (settings.rain && !reducedMotion()) ? '' : 'none';
+    audioEngine.configure({sensitivity:settings.audioSensitivity, intensity:settings.visualIntensity, bass:settings.bassBoost});
     updateMilestone();
     resizeSpectrum();
     makeRain();
@@ -116,7 +116,7 @@
   function updateMilestone() {
     const box = $('milestone');
     const date = String(settings.milestoneDate || '');
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    if (!settings.showMilestone || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       box.hidden = true;
       return;
     }
@@ -188,46 +188,29 @@
     }
   }
 
-  // Audio callbacks are registered at top level, immediately after HTML exists.
-  // Received sample values are not substituted with a fake idle animation.
+  // Real audio samples only. Media metadata never substitutes for audio input.
+  // v0.2.1: adaptive, bounded gain designed for observed PEAK 0.01--0.05.
   function audioListener(samples) {
-    if (!samples || samples.length < 128) return;
-    audioCallbacks++;
-    lastAudioAt = performance.now();
-    let peak = 0;
-    for (let i = 0; i < 64; i++) {
-      const left = Number(samples[i]) || 0;
-      const right = Number(samples[i + 64]) || 0;
-      const volume = clamp((Math.max(0, left) + Math.max(0, right)) / 2, 0, 1);
-      audioLevels[i] = volume;
-      if (volume > peak) peak = volume;
-    }
-    audioPeak = peak;
+    if (!audioEngine.ingest(samples, performance.now())) return;
+    audioCallbacks = audioEngine.callbacks;
+    lastAudioAt = audioEngine.lastInputAt;
+    audioPeak = audioEngine.lastPeak; // raw diagnostic PEAK, not post-gain height
   }
   function audioMode(now) {
     if (!registeredAudio) return 'unavailable';
-    if (now - lastAudioAt >= 2400) return 'waiting';
-    return audioPeak > .003 ? 'active' : 'quiet';
+    return audioEngine.state(now);
   }
-  function paintSpectrum(now) {
+  function paintSpectrum(now, dt) {
     const bounds = spectrumCanvas.getBoundingClientRect();
     const w = bounds.width, h = bounds.height;
     if (!w || !h) return;
     spectrumCtx.clearRect(0, 0, w, h);
+    const bars = audioEngine.update(now, dt);
     const mode = audioMode(now);
-    const bandCount = filteredBars.length;
     const gap = w < 310 ? 2 : 3;
-    const barWidth = (w - gap * (bandCount - 1)) / bandCount;
-    const gain = clamp(settings.audioSensitivity / 100, .25, 2) * 3;
-    for (let i = 0; i < bandCount; i++) {
-      const idx = Math.floor(i * 64 / bandCount);
-      const next = Math.min(63, idx + 1);
-      const raw = mode === 'active' ? (audioLevels[idx] + audioLevels[next]) / 2 : 0;
-      const scaled = clamp(Math.sqrt(raw * gain), 0, 1);
-      const current = filteredBars[i];
-      const speed = scaled > current ? .48 : .15;
-      filteredBars[i] += (scaled - current) * speed;
-      const value = filteredBars[i];
+    const barWidth = (w - gap * (bars.length - 1)) / bars.length;
+    for (let i = 0; i < bars.length; i++) {
+      const value = bars[i];
       const actualHeight = Math.max(2, value * (h - 3));
       const x = i * (barWidth + gap), y = h - actualHeight;
       spectrumCtx.fillStyle = value > .46 ? 'rgba(231,146,255,.97)' : 'rgba(170,124,234,.82)';
@@ -254,7 +237,7 @@
     $('diag-render').textContent = `MOTION: ${motion}  |  RAIN DROPS: ${rainDrops.length}  |  FPS: ${renderFps.toFixed(0)}`;
     const mode = audioMode(now).toUpperCase();
     const age = Number.isFinite(lastAudioAt) ? (now - lastAudioAt) / 1000 : null;
-    $('diag-audio').textContent = `AUDIO: ${mode}  |  CALLBACKS: ${audioCallbacks}  |  PEAK: ${audioPeak.toFixed(3)}  |  LAST: ${age === null ? 'NEVER' : age.toFixed(1) + 's'}`;
+    $('diag-audio').textContent = `AUDIO: ${mode}  |  CALLBACKS: ${audioCallbacks}  |  RAW PEAK: ${audioPeak.toFixed(3)}  |  GAIN: ${audioEngine.gain.toFixed(1)}x  |  LAST: ${age === null ? 'NEVER' : age.toFixed(1) + 's'}`;
   }
   function frame(now) {
     requestAnimationFrame(frame);
@@ -267,7 +250,7 @@
     const dt = clamp((now - previousFrame) / 1000, 0, .075);
     previousFrame = now;
     paintRain(dt);
-    if (settings.music) paintSpectrum(now);
+    if (settings.music) paintSpectrum(now, dt);
     drawnFrames++;
     if (now - fpsMeasuredAt > 1050) {
       renderFps = drawnFrames * 1000 / (now - fpsMeasuredAt);
@@ -327,6 +310,8 @@
         showcalendar: 'calendar', showprojects: 'projects', showmusic: 'music',
         showscanlines: 'scanlines', reducedmotion: 'reducedMotion',
         uiscale: 'panelScale', audiosensitivity: 'audioSensitivity',
+        visualintensity: 'visualIntensity', bassboost: 'bassBoost',
+        showmilestone: 'showMilestone',
         showdiagnostics: 'diagnostics',
         milestonedate: 'milestoneDate', milestonename: 'milestoneName'
       };

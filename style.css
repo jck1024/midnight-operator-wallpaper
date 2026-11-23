@@ -232,3 +232,19 @@ body.cinematic .diagnostics { display: none !important; }
   .calendar-grid .date { padding: 2px 0; }
   .calendar-foot { margin-top: 5px; padding-top: 5px; }
 }
+
+/* v0.2.1: preserve v0.2 placement; longer diagnostics still fits smaller displays. */
+.diagnostics{width:min(570px,56vw)}
+.milestone[hidden]{display:none!important}
+@media(max-width:930px){.diagnostics{width:min(485px,55vw);font-size:10px}}
+/* With shorter displays the right-hand calendar reaches the lower edge.
+   Relocate a configured countdown beneath WORKSPACE instead of covering dates. */
+@media (max-height:999px) {
+  .milestone {
+    right:auto;
+    left:var(--spacing);
+    top:clamp(320px, 48vh, 450px);
+    bottom:auto;
+    max-width:min(355px, calc(100vw - 2 * var(--spacing)));
+  }
+}

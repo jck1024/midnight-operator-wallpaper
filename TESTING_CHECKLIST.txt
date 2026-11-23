@@ -1,47 +1,49 @@
-MIDNIGHT OPERATOR v0.2 — TEST / ACCEPTANCE CHECKLIST
-====================================================
-Mark [PASS], [FAIL], or [NOT TESTED]. Include screenshots for any failures.
+MIDNIGHT OPERATOR v0.2.1 — USER ACCEPTANCE TESTS
+================================================
+Mark PASS, FAIL, or NOT TESTED. Do not call untested checks failures.
 
-INSTALL / DISPLAY
-[ ] New v0.2 imports separately; v0.1 still appears in Installed.
-[ ] Artwork appears; panels do not overlap or clip on your laptop display.
-[ ] World Clock is more readable than v0.1.
-[ ] Now Playing title, art and spectrum are more readable than v0.1.
-[ ] Calendar dates are more readable than v0.1.
+A. SAFE INSTALLATION
+[ ] Imported new INDEX.HTML without errors; separate from v0.2.
+[ ] v0.2 remains selectable as a rollback.
+[ ] Artwork, clock, calendar, music metadata and UI look correct.
 
-SPOTIFY AUDIO
-[ ] Song title/artist/album art update when Spotify changes tracks.
-[ ] With Spotify playing, visualiser bars move with actual sound.
-[ ] Diagnostics reads ACTIVE and callback count increases during playback.
-[ ] With Spotify silent/paused, bars return to baseline.
-[ ] Spectrum sensitivity changes bar response without changing volume.
-[ ] If not working, record diagnostics status (WAITING/QUIET/etc) and audio
-    recording device selected in Wallpaper Engine.
+B. AUDIO (FIRST PRIORITY)
+[ ] Spotify shows AUDIO: ACTIVE with callback count increasing.
+[ ] RAW PEAK remains readable; note actual range (e.g. 0.01--0.05).
+[ ] Bars visibly move in response to different parts of the music.
+[ ] Sensitivity 100% vs 150% visibly changes the amplitude.
+[ ] Bar intensity 85% vs 150% visibly changes the *displayed* bar height.
+[ ] Bass emphasis 100% vs 175% visibly changes lower-frequency response.
+[ ] Pausing Spotify lets the bars fall to near-idle in roughly 1--2 seconds.
+[ ] Quiet audio does not cause permanently high/jittering visualisation.
+[ ] Song, artist and artwork continue to display correctly.
+[ ] With diagnostics disabled, wallpaper looks clean.
 
-ANIMATION / USER SETTINGS
-[ ] Rain is clearly visible and moves over the city.
-[ ] Changing Rain intensity 0 -> 100 visibly changes rainfall.
-[ ] Fog moves over ~20 seconds; subtle city camera drift is visible over ~1 min.
-[ ] A train light pass can be seen over ~13 seconds along the distant rail.
-[ ] Neon lighting subtly pulses over ~8 seconds.
-[ ] Reduced Motion disables rain and the moving scene effects.
-[ ] Hiding HUD switches to clean cinematic view.
-[ ] Other individual panel toggles work (calendar, projects, music).
-[ ] Dashboard size slider changes clock/music/calendar sizing.
-[ ] Settings persist after Wallpaper Engine restart.
-[ ] Countdown shows correct time when enabled with a valid future date.
+C. COUNTDOWN
+[ ] New project starts with no countdown until a valid date is entered.
+[ ] A date such as 2027-01-01 shows a live countdown.
+[ ] Countdown label updates correctly.
+[ ] Show countdown OFF hides it; ON restores it with a valid date.
+[ ] No overlap with calendar at your laptop's resolution.
+[ ] Countdown settings persist after restarting Wallpaper Engine.
 
-PERFORMANCE / RELIABILITY
-[ ] CPU, GPU and RAM remain acceptable versus your v0.1 baseline.
-[ ] No unexpected extra fan noise/heat after 10-20 minutes.
-[ ] Wallpaper pauses/stops correctly on fullscreen games and VirtualBox.
-[ ] Battery pause/stop policy behaves as you configured it.
-[ ] Wallpaper resumes after sleep/wake.
-[ ] No major render glitches on your normal display resolution.
+D. REGRESSION AND PERFORMANCE
+[ ] Rain intensity works; camera, fog and train light motion remain visible.
+[ ] Reduced Motion disables moving effects.
+[ ] Dashboard and individual panel visibility controls still work.
+[ ] London / Hong Kong time and calendar remain correct.
+[ ] No UI overflow at your display resolution.
+[ ] CPU/GPU/RAM stay close to v0.2 with Spotify playing and paused.
+[ ] Fullscreen game / VirtualBox pause or stop behaviour still works.
+[ ] Sleep/wake and battery behaviour are unchanged.
 
-DIAGNOSTICS NOTES
-Record actual CPU %, GPU %, and MB used if possible.
-Report: Wallpaper Engine version, screen resolution, Spotify app/browser,
-which audio output device you use and diagnostics ACTIVE/QUIET/WAITING.
-
-Rollback: Select Midnight Operator v0.1 in Installed if v0.2 behaves worse.
+REPORT BACK
+-----------
+Wallpaper resolution:
+Spotify track/device:
+RAW PEAK range:
+GAIN range:
+Sensitivity / intensity / bass values:
+What looks better / worse:
+CPU/GPU/RAM compared with v0.2:
+Any errors, glitches or overlap:

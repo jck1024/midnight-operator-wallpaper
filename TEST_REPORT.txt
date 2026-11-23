@@ -1,27 +1,44 @@
-MIDNIGHT OPERATOR v0.2 — BROWSER TEST REPORT
-============================================
-Build date: 2026-11-22
+MIDNIGHT OPERATOR v0.2.1 — DEVELOPMENT VALIDATION
+================================================
+Validation environment: headless Chromium + Node.js, NOT Wallpaper Engine.
+Status: Static/build and simulated runtime checks PASS.
 
-Verified in headless Chromium using a local test harness:
-- HTML, CSS and JavaScript loaded without page JavaScript exceptions.
-- project.json parsed as JSON; script.js passed Node's syntax check.
-- Rendering: 1920x1080, 1650x927, 1366x768, 1280x720, 1024x768.
-- None of the six main layout blocks overflowed at default panel scale.
-- 120% UI scale did not overlap the footer at tested 16:9 screen sizes.
-- Synthetic 128-value Wallpaper Engine audio arrays drove ACTIVE state and
-  updated the visualiser; simulated metadata changed the song title.
-- Foreground rain canvas contained visible drawn pixels that changed.
-- CSS fog transforms changed over time.
-- Reduced Motion hid rain and the train and stopped moving scene effects.
-- Individual dashboard toggle CSS, pause animation state, countdown
-  visibility and cinematic-mode logic operated as intended.
+SOURCE / PACKAGING
+------------------
+* Derived from the original v0.2 files previously delivered to the user.
+* Used the same local artwork and v0.2 animation/layout implementation.
+* project.json parses; general.supportsaudioprocessing=true.
+* index.html uses local files only, no network imports.
+* script.js and audio-engine.js pass node --check.
 
-NOT YET VERIFIED (requires a real Windows Wallpaper Engine installation):
-- Audio callback delivery from Spotify via Wallpaper Engine.
-- Recording device choice and reliability with the user's Windows audio stack.
-- True Windows media metadata and artwork after importing this release.
-- Persistence of properties after Wallpaper Engine restarts.
-- Real sustained resource use, sleep/wake and fullscreen performance on laptop.
+SYNTHETIC AUDIO CHECKS
+----------------------
+Source: 128 frequency bins (64 left and 64 right), fed to genuine callback
+code using plausible frequency profiles and PEAK of 0.01--0.05.
+At defaults (125 sensitivity, 125 intensity, 125 bass), after adaptation:
+  PEAK 0.01 -> average bar ~0.307, maximum ~0.536
+  PEAK 0.02 -> average bar ~0.443, maximum ~0.773
+  PEAK 0.03 -> average bar ~0.529, maximum ~0.921
+  PEAK 0.05 -> average bar ~0.602, maximum <=1.0
+At PEAK below 0.004 the silence gate prevents false response.
+Tests also verified capped output, monotonic increase with settings,
+and decay to near-idle after input becomes quiet or stops.
+These values reflect test signals, NOT observed Spotify values.
 
-The browser test mocks are NOT included in the production wallpaper files.
-Diagnostic overlay shows true received callbacks in the installed wallpaper.
+BROWSER SIMULATION
+------------------
+Tested: 1920x1080, 1650x927, 1366x768, 1280x720 and 1024x768.
+* No JS page errors during tests.
+* Audio callback mock reports ACTIVE, callbacks and RAW PEAK/GAIN.
+* Valid countdown date appears and its Show countdown toggle works.
+* Individual music visibility and Reduced Motion toggles work.
+* Whole-page content stays within viewport. Dashboard fits visible bounds.
+* CSS relocated countdown on shorter screens to avoid Calendar overlap.
+* Test screenshots generated at 1920x1080 and 1366x768.
+
+LIMITATIONS / FOLLOW-UP
+-----------------------
+These automated tests cannot exercise Wallpaper Engine's native audio device
+or confirm behaviour for YOUR Spotify player, nor measure actual CPU/GPU/RAM
+or persistence of Wallpaper Engine Properties on your machine. Re-run the
+included user checklist after importing. Preserve v0.2 as a fallback.

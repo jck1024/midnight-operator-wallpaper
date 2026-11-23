@@ -1,14 +1,34 @@
-MIDNIGHT OPERATOR CHANGELOG
-===========================
-0.2.0 — Motion & Audio Repair (2026-11-22)
-- Moved supportsaudioprocessing into project.json.general.
-- Strengthened canvas rainfall, animated haze, rail lights and neon pulse.
-- Improved audio gain/smoothing and added real-signal troubleshooting UI.
-- Enlarged World Clock / Now Playing / Calendar; introduced size slider.
-- Capped rainfall and canvas DPI, respected Wallpaper Engine FPS setting.
-- Strengthened Reduced Motion and paused animation behaviour.
-- Updated local guide and acceptance tests.
+MIDNIGHT OPERATOR RELEASE NOTES
+===============================
+Version: 0.2.1 — Audio Response Tune-Up (22 November 2026)
 
-0.1.0 — Initial Night Shift prototype
-- Original city scene and live widgets.
-- Music integration, rain, project chips and basic customisation.
+FIXES AND IMPROVEMENTS
+----------------------
+* More visible audio bars when Wallpaper Engine supplies low PEAK samples,
+  specifically calibrated for observed Spotify PEAK values of 0.01--0.05.
+* New audio-engine.js separates audio sample adaptation from canvas drawing.
+* Bounded automatic gain control uses a moving reference volume rather than
+  solely fixed raw sample scaling. Reference is not adapted from silence.
+* Independent sliders: Audio sensitivity 25--200% (default 125%),
+  Visualiser bar intensity 50--200% (default 125%),
+  Bass emphasis 75--200% (default 125%).
+* Fast attack and smoother release; bars fall to idle when audio ceases.
+* Diagnostics now display RAW PEAK and computed GAIN as separate values.
+* Explicit Show countdown property and clearer date input instructions.
+* Countdown moves below the Workspace panel on shorter displays so it no
+  longer covers the right-hand Calendar.
+* Updated title, version label, preview and documentation.
+
+UNCHANGED FROM 0.2.0
+--------------------
+* Same image, visual direction and overall dashboard layout.
+* Correct general.supportsaudioprocessing flag and immediate audio registration.
+* Spotify/Windows media metadata, album artwork and London/Hong Kong clocks.
+* Rain, neon, haze, camera drift and passing light animations.
+* Dashboard toggles, Reduced Motion, FPS cap, fullscreen/battery behaviour.
+* Offline / no network / no trackers.
+
+NOT CLAIMED
+-----------
+Automated checks simulate Wallpaper Engine audio data in a browser. They do
+not prove live Spotify capture or system performance on your Windows laptop.
