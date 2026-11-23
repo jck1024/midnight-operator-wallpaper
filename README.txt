@@ -1,108 +1,81 @@
-MIDNIGHT OPERATOR v0.2.1 — AUDIO RESPONSE TUNE-UP
-=================================================
-Standalone, entirely offline Wallpaper Engine WEB wallpaper for Windows.
-This is a full new project, not a patch. NO CODE EDITING IS REQUIRED.
-Retains v0.2's city artwork, layout, animations, clocks, calendar and music metadata.
+MIDNIGHT OPERATOR v0.3.0 — LIVING CITY
+========================================
+This is a complete, self-contained Wallpaper Engine WEB wallpaper.
+Built from the verified v0.2.1 project. Keep v0.2.1 installed as your rollback.
 
-IMPORTANT: KEEP v0.2 INSTALLED
------------------------------
-This ZIP is separate and does not alter v0.1 or v0.2.
-The separate v0.2.1 wallpaper does not automatically inherit v0.2's saved
-Properties, such as your countdown date. Re-enter them in Wallpaper Engine.
-
-INSTALLATION (WINDOWS + WALLPAPER ENGINE)
-----------------------------------------
-1. Extract the entire ZIP to a NEW folder (not your existing v0.2 folder).
-   Example: Documents\WallpaperProjects\Midnight_Operator_v0.2.1\
-2. Open Wallpaper Engine > Wallpaper Editor / Create Wallpaper.
-3. Drag INDEX.HTML from this extracted new folder onto Create Wallpaper.
-   Wallpaper Engine will import its CSS, JS and the assets/ directory.
-   Do not drag the ZIP, preview.jpg, audio-engine.js or an older index.html.
-4. Save with a unique name: "Midnight Operator v0.2.1".
-5. Select the new wallpaper in the Wallpaper Engine Installed tab.
-6. Open Properties for this new wallpaper to customise and retest.
-7. Leave your existing v0.2 installed. Switch back if anything regresses.
-
-FIRST SPOTIFY TEST (RECOMMENDED DEFAULTS)
------------------------------------------
-- Audio sensitivity / input gain: 125% (new adaptive engine)
-- Visualiser bar intensity: 125% (NEW; independent of audio sensitivity)
-- Visualiser bass emphasis: 125% (NEW; emphasises lower frequency bars)
-- Show diagnostics: ON while testing; OFF for everyday use
-
-1. Play a track in Spotify; audio should be routed to your normal Windows output.
-2. Watch Now Playing. Track metadata and actual spectrum are separate APIs.
-3. Watch the visualiser. Bars should vary meaningfully with the music.
-4. Diagnostics: AUDIO ACTIVE, raw PEAK and GAIN are shown.
-   - RAW PEAK in 0.01--0.05 is *normal for your observed input*.
-   - GAIN > 1.0x represents internal visual amplification; it does NOT
-     modify Spotify volume or the audio you hear.
-   - CALLBACKS increases when Wallpaper Engine supplies audio data.
-5. Stop or pause music. Bars must fall toward idle; they must not fake music.
-6. If bars are still too small: try intensity 150%, then sensitivity 150%.
-   If bars are too tall all the time: reduce intensity to 85%-100%.
-   For less bass-heavy movement, set bass emphasis to 100%.
-7. After testing, disable diagnostics.
-
-COUNTDOWN — EXPLICIT INSTRUCTIONS
----------------------------------
-The countdown is still optional and is NOT shown until a valid date is set.
-1. In this version's Properties, keep Show countdown ON (default).
-2. Enter a future date as YYYY-MM-DD in Countdown target date.
-   Example: 2027-01-01
-3. Set Countdown label, e.g. NEW YEAR.
-4. The timer targets the start of that date (midnight LOCAL computer time).
-5. To hide it, turn Show countdown OFF or clear the target date.
-6. On shorter screens it moves beneath WORKSPACE to avoid the calendar.
-7. Cinematic Mode hides it along with the rest of the dashboard.
-Your countdown date from v0.2 is NOT automatically imported into v0.2.1.
-
-OTHER SETTINGS (UNCHANGED FROM v0.2)
+INSTALL (Windows + Wallpaper Engine)
 ------------------------------------
-- Rain toggle and intensity slider
-- Dashboard / cinematic mode
-- Calendar, Workspace, Now Playing visibility
-- Dashboard text/cover scale 90%-120%
-- Scanlines, Reduced Motion, Diagnostics
+1. Extract the ZIP into a NEW folder. Keep every file and the assets folder together.
+2. In Wallpaper Engine, open the wallpaper editor (Create Wallpaper).
+3. Drag the included index.html onto Create Wallpaper.
+4. Save under the distinct name "Midnight Operator v0.3 — Living City".
+5. Select it in the Installed library and apply it.
+6. Open Wallpaper Properties and set your choices (new version does NOT
+   automatically carry over the countdown date or previous slider values).
+7. Keep v0.2.1 untouched until v0.3 passes the included acceptance tests.
 
-PERFORMANCE AND PRIVACY
------------------------
-- No external websites, analytics, trackers, CDN, microphone access or network calls.
-- Adaptive gain controls only the visualization. No sound is played/recorded.
-- Same 30 FPS ceiling and 240-particle rain cap as v0.2; additional audio
-  calculation is bounded to 64 audio bands and 40 screen bars per frame.
-- Keep your working Wallpaper Engine battery/fullscreen preferences, including
-  Stop (free memory) for fullscreen games or demanding VM workloads.
-- Actual Windows Spotify and CPU/GPU/RAM performance require your own retest.
-- The projects panel is decorative, not connected to real project data.
-- The city background is one image with animated overlays, not animated buildings.
+NEW SETTINGS IN WALLPAPER PROPERTIES
+-----------------------------------
+Living city effects: turns off the entire extra city layer when disabled.
+City activity / brightness: 0–100% strength; start at 70%.
+Animated neon signs: two small cyberpunk signs, flickering subtly.
+Elevated traffic and distant drones: city movement visible over time.
+Balcony rain reflections: small animated glints near the wet ledge.
+Normalise quieter audio: optional boost for Spotify at lower app volume.
 
-TROUBLESHOOTING
----------------
-No Spotify bars, but track text works? Check diagnostics: if WAITING, check
-Wallpaper Engine Settings > General > Media and audio recording device.
-The audio listener has to receive actual audio samples; media metadata alone
-isn't proof of audio capture. If ACTIVE with low RAW PEAK, raise intensity.
-If visualiser is too energetic, lower bar intensity and/or sensitivity.
-If countdown is absent, enter a valid YYYY-MM-DD date and ensure Cinematic Mode
-is off; verify Show countdown is on.
-If the UI is clipped, reduce Dashboard scale to 100%, then report resolution.
+RECOMMENDED FIRST TEST
+----------------------
+Dashboard scale: 108% (adjust if needed)
+Rain intensity: 68%
+Living city effects: ON
+City activity / brightness: 70% (increase to 85% for clearer motion)
+Animated neon signs: ON
+Elevated traffic and distant drones: ON
+Balcony rain reflections: ON
+Normalise quieter audio: ON
+Audio sensitivity: 125%
+Visualiser bar intensity: 125%
+Bass emphasis: 125%
+Show diagnostics: ON for the first test, then OFF
+Reduced motion: OFF when testing movement
 
-FILES
+COUNTDOWN
+---------
+Set "Show countdown" ON, enter a date in YYYY-MM-DD (e.g., 2027-01-01),
+and give it a name. Invalid or blank dates hide it. The countdown uses your
+PC's local timezone and counts down to midnight on that date.
+
+AUDIO
 -----
-index.html        Wallpaper entry point — import this one
-style.css         Layout and animations
-audio-engine.js   Adaptive audio visualiser signal processing (new)
-script.js         Clocks, media integration, controls, canvas rendering
-project.json      Wallpaper Engine project metadata and Properties
-assets/           Local background artwork
-preview.jpg       Wallpaper Engine preview
-CHANGELOG.txt     Detailed changes
-TESTING_CHECKLIST.txt   Test checklist
-TEST_REPORT.txt  Automated browser/synthetic tests and limitations
+Spotify metadata and audio spectrum are independent APIs. The visualiser
+requires Wallpaper Engine to receive actual audio callbacks; track metadata
+alone is not enough. v0.3 features quiet-input normalisation, but results
+can vary by Spotify output, Windows device settings and Wallpaper Engine.
+The wallpaper does not alter actual audio output volume.
 
-OFFICIAL REFERENCE
-------------------
-Import: https://docs.wallpaperengine.io/en/web/first/gettingstarted.html
-Audio: https://docs.wallpaperengine.io/en/web/audio/visualizer.html
-Media: https://docs.wallpaperengine.io/en/web/audio/media.html
+PERFORMANCE & SAFETY
+--------------------
+The additional effects use a small transparent canvas overlay, capped
+pixel density, and Wallpaper Engine's FPS cap (up to 30 FPS in this version).
+The effect layer pauses with Wallpaper Engine and respects Reduced Motion.
+The entire project is local; there are no remote scripts, tracking,
+background requests, fake security telemetry, or added audio sources.
+For demanding games or VirtualBox, set Wallpaper Engine to Pause or Stop.
+
+FOLDER CONTENTS
+---------------
+index.html         Wallpaper entry point — import THIS file
+style.css          Panel layout and scenery styling
+script.js          Clocks, calendar, rain, media, properties, render loop
+audio-engine.js    Quiet-volume adaptive visualiser
+city-effects.js    New city lights, traffic, drones, reflections
+project.json       Wallpaper Engine metadata and user settings
+assets/night_city.jpg   Original v0.2.1 city artwork
+preview.jpg        Wallpaper thumbnail
+CHANGELOG.txt      Release notes
+TEST_REPORT.txt    Build-time verification summary
+TESTING_CHECKLIST.txt   Manual acceptance tests
+
+IMPORTANT: Browser test data/media shown in preview images are synthetic.
+Only Wallpaper Engine on your laptop can verify real Spotify capture,
+performance, sleep/resume and any display-driver-specific behaviour.

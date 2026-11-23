@@ -1,4 +1,4 @@
-/* MIDNIGHT OPERATOR 0.2.1 — standalone Wallpaper Engine web wallpaper.
+/* MIDNIGHT OPERATOR 0.3.0 — standalone Wallpaper Engine web wallpaper.
  * No remote scripts, analytics, network calls or artificial music animation.
  * Audio samples and media metadata come ONLY from Wallpaper Engine callbacks.
  * Diagnostic UI distinguishes callback registration from receiving real samples.
@@ -9,6 +9,7 @@
   const $ = id => document.getElementById(id);
   const rainCanvas = $('rain');
   const spectrumCanvas = $('spectrum');
+  const cityCanvas = $('city-effects');
   const rainCtx = rainCanvas.getContext('2d', {alpha: true});
   const spectrumCtx = spectrumCanvas.getContext('2d', {alpha: true});
   const motionPreference = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -16,6 +17,7 @@
     rain: true, rainAmount: 68, hud: true, calendar: true,
     projects: true, music: true, scanlines: true, reducedMotion: false,
     panelScale: 108, audioSensitivity: 125, visualIntensity: 125, bassBoost: 125, diagnostics: false, showMilestone: true,
+    cityEffects: true, cityActivity: 70, citySigns: true, cityTraffic: true, cityReflections: true, quietBoost: true,
     milestoneDate: '', milestoneName: 'MILESTONE'
   };
 
@@ -23,6 +25,7 @@
   let renderFpsCap = 30, previousFrame = 0, drawnFrames = 0, renderFps = 0;
   let fpsMeasuredAt = performance.now();
   const audioEngine = new window.MidnightAudioEngine(40);
+  const cityEngine = new window.MidnightCityEffects(cityCanvas);
   let registeredAudio = false;
   let audioCallbacks = 0, lastAudioAt = -Infinity, audioPeak = 0;
   let hasMedia = false, lastAudioUiAt = 0, lastDiagAt = 0;
@@ -38,10 +41,13 @@
     document.body.classList.toggle('no-music', !settings.music);
     document.body.classList.toggle('no-scan', !settings.scanlines);
     document.body.classList.toggle('low-motion', reducedMotion());
+    document.body.classList.toggle('no-city', !settings.cityEffects);
+    document.body.classList.toggle('no-signs', !settings.citySigns);
+    cityEngine.configure({enabled:settings.cityEffects, activity:settings.cityActivity, signs:settings.citySigns, traffic:settings.cityTraffic, reflections:settings.cityReflections, reduced:reducedMotion()});
     document.documentElement.style.setProperty('--panel-scale', String(clamp(settings.panelScale, 90, 120) / 100));
     $('diagnostics').hidden = !settings.diagnostics;
     $('rain').style.display = (settings.rain && !reducedMotion()) ? '' : 'none';
-    audioEngine.configure({sensitivity:settings.audioSensitivity, intensity:settings.visualIntensity, bass:settings.bassBoost});
+    audioEngine.configure({sensitivity:settings.audioSensitivity, intensity:settings.visualIntensity, bass:settings.bassBoost, quietBoost:settings.quietBoost});
     updateMilestone();
     resizeSpectrum();
     makeRain();
@@ -148,6 +154,7 @@
     rainCanvas.height = Math.round(height * dpr);
     rainCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     makeRain();
+    cityEngine.resize(width,height,dpr);
   }
   function resizeSpectrum() {
     const bounds = spectrumCanvas.getBoundingClientRect();
@@ -234,7 +241,7 @@
   function reportDiagnostics(now) {
     if (!settings.diagnostics) return;
     const motion = reducedMotion() ? 'REDUCED' : paused ? 'PAUSED' : 'RUNNING';
-    $('diag-render').textContent = `MOTION: ${motion}  |  RAIN DROPS: ${rainDrops.length}  |  FPS: ${renderFps.toFixed(0)}`;
+    $('diag-render').textContent = `MOTION: ${motion}  |  RAIN: ${rainDrops.length}  |  CITY: ${settings.cityEffects ? "ON" : "OFF"}  |  FPS: ${renderFps.toFixed(0)}`;
     const mode = audioMode(now).toUpperCase();
     const age = Number.isFinite(lastAudioAt) ? (now - lastAudioAt) / 1000 : null;
     $('diag-audio').textContent = `AUDIO: ${mode}  |  CALLBACKS: ${audioCallbacks}  |  RAW PEAK: ${audioPeak.toFixed(3)}  |  GAIN: ${audioEngine.gain.toFixed(1)}x  |  LAST: ${age === null ? 'NEVER' : age.toFixed(1) + 's'}`;
@@ -250,6 +257,7 @@
     const dt = clamp((now - previousFrame) / 1000, 0, .075);
     previousFrame = now;
     paintRain(dt);
+    cityEngine.paint(now,dt);
     if (settings.music) paintSpectrum(now, dt);
     drawnFrames++;
     if (now - fpsMeasuredAt > 1050) {
@@ -313,7 +321,9 @@
         visualintensity: 'visualIntensity', bassboost: 'bassBoost',
         showmilestone: 'showMilestone',
         showdiagnostics: 'diagnostics',
-        milestonedate: 'milestoneDate', milestonename: 'milestoneName'
+        milestonedate: 'milestoneDate', milestonename: 'milestoneName',
+        cityeffects: 'cityEffects', cityactivity: 'cityActivity', citysigns: 'citySigns',
+        citytraffic: 'cityTraffic', cityreflections: 'cityReflections', quietboost: 'quietBoost'
       };
       Object.keys(map).forEach(key => {
         if (props[key] && Object.prototype.hasOwnProperty.call(props[key], 'value')) {

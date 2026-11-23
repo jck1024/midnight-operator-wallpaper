@@ -1,49 +1,27 @@
-MIDNIGHT OPERATOR v0.2.1 — USER ACCEPTANCE TESTS
-================================================
-Mark PASS, FAIL, or NOT TESTED. Do not call untested checks failures.
+MIDNIGHT OPERATOR v0.3 — ACCEPTANCE TESTS
+========================================
+Check only what you have VERIFIED. Unchecked = NOT CONFIRMED, not failed.
 
-A. SAFE INSTALLATION
-[ ] Imported new INDEX.HTML without errors; separate from v0.2.
-[ ] v0.2 remains selectable as a rollback.
-[ ] Artwork, clock, calendar, music metadata and UI look correct.
+[ ] 1. v0.3 imports separately, v0.2.1 remains selectable.
+[ ] 2. City signs visibly flicker occasionally, and can be toggled off.
+[ ] 3. City window glows, train/traffic and drones show subtle movement.
+[ ] 4. Balcony reflections move and can be toggled off.
+[ ] 5. City activity slider changes the visible effects.
+[ ] 6. Master Living City toggle removes the added city layer.
+[ ] 7. Spotify audio visualiser works with app volume BELOW 60%, and sound stays unchanged.
+[ ] 8. Silence produces idle bars and audio fades after music stops.
+[ ] 9. Clock/calendar/countdown/music metadata/rain and panel settings still work.
+[ ] 10. Reduced Motion and Wallpaper Engine pause/fullscreen behavior still work.
+[ ] 11. Dashboard fits your display; icons, taskbar, and countdown don't overlap.
+[ ] 12. CPU/GPU/RAM, fan, battery usage acceptable compared with v0.2.1.
+[ ] 13. Settings survive restart and wallpaper resumes from sleep.
 
-B. AUDIO (FIRST PRIORITY)
-[ ] Spotify shows AUDIO: ACTIVE with callback count increasing.
-[ ] RAW PEAK remains readable; note actual range (e.g. 0.01--0.05).
-[ ] Bars visibly move in response to different parts of the music.
-[ ] Sensitivity 100% vs 150% visibly changes the amplitude.
-[ ] Bar intensity 85% vs 150% visibly changes the *displayed* bar height.
-[ ] Bass emphasis 100% vs 175% visibly changes lower-frequency response.
-[ ] Pausing Spotify lets the bars fall to near-idle in roughly 1--2 seconds.
-[ ] Quiet audio does not cause permanently high/jittering visualisation.
-[ ] Song, artist and artwork continue to display correctly.
-[ ] With diagnostics disabled, wallpaper looks clean.
+Recommended audio test: listen at your NORMAL safe listening volume,
+not an artificially high one. Test Spotify app volume near 30%, 50% and 70%.
+Enable Diagnostics to check ACTIVE/QUIET/WAITING and RAW PEAK. If the visualiser
+appears to animate in complete silence, turn Normalise quieter audio OFF
+and report the effect plus RAW PEAK diagnostic.
 
-C. COUNTDOWN
-[ ] New project starts with no countdown until a valid date is entered.
-[ ] A date such as 2027-01-01 shows a live countdown.
-[ ] Countdown label updates correctly.
-[ ] Show countdown OFF hides it; ON restores it with a valid date.
-[ ] No overlap with calendar at your laptop's resolution.
-[ ] Countdown settings persist after restarting Wallpaper Engine.
+Notes / unexpected issues:
 
-D. REGRESSION AND PERFORMANCE
-[ ] Rain intensity works; camera, fog and train light motion remain visible.
-[ ] Reduced Motion disables moving effects.
-[ ] Dashboard and individual panel visibility controls still work.
-[ ] London / Hong Kong time and calendar remain correct.
-[ ] No UI overflow at your display resolution.
-[ ] CPU/GPU/RAM stay close to v0.2 with Spotify playing and paused.
-[ ] Fullscreen game / VirtualBox pause or stop behaviour still works.
-[ ] Sleep/wake and battery behaviour are unchanged.
 
-REPORT BACK
------------
-Wallpaper resolution:
-Spotify track/device:
-RAW PEAK range:
-GAIN range:
-Sensitivity / intensity / bass values:
-What looks better / worse:
-CPU/GPU/RAM compared with v0.2:
-Any errors, glitches or overlap:

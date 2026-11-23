@@ -4,12 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="color-scheme" content="dark">
-  <title>Midnight Operator v0.2.1 — Audio Response Tune-Up</title>
+  <title>Midnight Operator v0.3 — Living City</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main id="wallpaper" aria-label="Midnight Operator animated wallpaper">
     <div class="scene" aria-hidden="true"></div>
+    <div class="city-layer" aria-hidden="true">
+      <canvas id="city-effects"></canvas>
+      <div class="city-sign sign-1">夜<span>24</span></div>
+      <div class="city-sign sign-2">OPEN</div>
+    </div>
     <div class="scene-glow" aria-hidden="true"></div>
     <div class="far-fog" aria-hidden="true"></div>
     <div class="neon-pulse" aria-hidden="true"></div>
@@ -22,7 +27,7 @@
       <div class="title-lockup">
         <div class="title-kicker"><span class="status-pip"></span> PERSONAL ENVIRONMENT <span class="thin-slash">//</span> NIGHT SHIFT</div>
         <h1>MIDNIGHT <em>OPERATOR</em></h1>
-        <div class="title-sub">A QUIET PLACE ABOVE THE NOISE <span class="line"></span> 0.2.1</div>
+        <div class="title-sub">A QUIET PLACE ABOVE THE NOISE <span class="line"></span> 0.3.0</div>
       </div>
     </div>
 
@@ -63,7 +68,7 @@
     <div id="milestone" class="milestone" hidden><div class="milestone-tag">UPCOMING // <span id="milestone-name">MILESTONE</span></div><div class="milestone-value" id="milestone-value">00D 00H 00M</div></div>
 
     <aside id="diagnostics" class="diagnostics" hidden aria-label="Live diagnostic state">
-      <div class="diag-head">SYSTEM DIAGNOSTICS // v0.2.1</div>
+      <div class="diag-head">SYSTEM DIAGNOSTICS // v0.3.0</div>
       <div id="diag-render">MOTION: LOADING</div>
       <div id="diag-audio">AUDIO: INITIALISING</div>
       <div id="diag-hint">This panel shows real input state, not simulated audio.</div>
@@ -74,6 +79,7 @@
     <div class="corner-mark mark-one"></div><div class="corner-mark mark-two"></div>
   </main>
   <script src="audio-engine.js"></script>
+  <script src="city-effects.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

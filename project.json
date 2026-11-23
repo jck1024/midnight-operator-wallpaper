@@ -1,6 +1,6 @@
 {
-  "title": "Midnight Operator v0.2.1 — Audio Response Tune-Up",
-  "description": "Offline Wallpaper Engine web wallpaper. v0.2.1: adaptive low-level Spotify audio visualiser, separate bar-intensity control, bass emphasis and clearer countdown setup. All v0.2 city/motion/dashboard features retained.",
+  "title": "Midnight Operator v0.3 — Living City",
+  "description": "Offline Wallpaper Engine web wallpaper. Living City visual upgrade: animated neon signage, skyline window flicker, elevated traffic lights, distant drones, rain reflections; quiet-volume audio normalisation and performance controls. v0.2.1 dashboard retained.",
   "type": "web",
   "file": "index.html",
   "preview": "preview.jpg",
@@ -15,14 +15,53 @@
   "general": {
     "supportsaudioprocessing": true,
     "properties": {
-      "showrain": {
+      "cityeffects": {
         "order": 1,
+        "text": "Living city effects",
+        "type": "bool",
+        "value": true
+      },
+      "cityactivity": {
+        "order": 2,
+        "text": "City activity / effect brightness (%)",
+        "type": "slider",
+        "value": 70,
+        "min": 0,
+        "max": 100,
+        "step": 5
+      },
+      "citysigns": {
+        "order": 3,
+        "text": "Animated neon signs",
+        "type": "bool",
+        "value": true
+      },
+      "citytraffic": {
+        "order": 4,
+        "text": "Elevated traffic and distant drones",
+        "type": "bool",
+        "value": true
+      },
+      "cityreflections": {
+        "order": 5,
+        "text": "Balcony rain reflections",
+        "type": "bool",
+        "value": true
+      },
+      "quietboost": {
+        "order": 6,
+        "text": "Normalise quieter audio (experimental)",
+        "type": "bool",
+        "value": true
+      },
+      "showrain": {
+        "order": 11,
         "text": "Rain animation",
         "type": "bool",
         "value": true
       },
       "rainamount": {
-        "order": 2,
+        "order": 12,
         "text": "Rain intensity",
         "type": "slider",
         "value": 68,
@@ -31,31 +70,31 @@
         "step": 1
       },
       "showhud": {
-        "order": 3,
+        "order": 13,
         "text": "Dashboard / cinematic mode",
         "type": "bool",
         "value": true
       },
       "showcalendar": {
-        "order": 4,
+        "order": 14,
         "text": "Show calendar",
         "type": "bool",
         "value": true
       },
       "showprojects": {
-        "order": 5,
+        "order": 15,
         "text": "Show workspace projects",
         "type": "bool",
         "value": true
       },
       "showmusic": {
-        "order": 6,
+        "order": 16,
         "text": "Show Now Playing and spectrum",
         "type": "bool",
         "value": true
       },
       "uiscale": {
-        "order": 7,
+        "order": 17,
         "text": "Key dashboard text / artwork size (%)",
         "type": "slider",
         "value": 108,
@@ -64,7 +103,7 @@
         "step": 2
       },
       "audiosensitivity": {
-        "order": 8,
+        "order": 18,
         "text": "Audio sensitivity / input gain (%)",
         "type": "slider",
         "value": 125,
@@ -72,38 +111,8 @@
         "max": 200,
         "step": 5
       },
-      "showscanlines": {
-        "order": 11,
-        "text": "Subtle scanlines",
-        "type": "bool",
-        "value": true
-      },
-      "reducedmotion": {
-        "order": 12,
-        "text": "Reduced motion (disable moving effects)",
-        "type": "bool",
-        "value": false
-      },
-      "showdiagnostics": {
-        "order": 13,
-        "text": "Show diagnostics (real motion and audio callback state)",
-        "type": "bool",
-        "value": false
-      },
-      "milestonedate": {
-        "order": 15,
-        "text": "Countdown target date (YYYY-MM-DD; blank = hidden)",
-        "type": "textinput",
-        "value": ""
-      },
-      "milestonename": {
-        "order": 16,
-        "text": "Countdown label (shown when date is valid)",
-        "type": "textinput",
-        "value": "MILESTONE"
-      },
       "visualintensity": {
-        "order": 9,
+        "order": 19,
         "text": "Visualiser bar intensity (%)",
         "type": "slider",
         "value": 125,
@@ -112,7 +121,7 @@
         "step": 5
       },
       "bassboost": {
-        "order": 10,
+        "order": 20,
         "text": "Visualiser bass emphasis (%)",
         "type": "slider",
         "value": 125,
@@ -120,11 +129,41 @@
         "max": 200,
         "step": 5
       },
+      "showscanlines": {
+        "order": 21,
+        "text": "Subtle scanlines",
+        "type": "bool",
+        "value": true
+      },
+      "reducedmotion": {
+        "order": 22,
+        "text": "Reduced motion (disable moving effects)",
+        "type": "bool",
+        "value": false
+      },
+      "showdiagnostics": {
+        "order": 23,
+        "text": "Show diagnostics (real motion and audio callback state)",
+        "type": "bool",
+        "value": false
+      },
       "showmilestone": {
-        "order": 14,
+        "order": 24,
         "text": "Show countdown (requires a target date)",
         "type": "bool",
         "value": true
+      },
+      "milestonedate": {
+        "order": 25,
+        "text": "Countdown target date (YYYY-MM-DD; blank = hidden)",
+        "type": "textinput",
+        "value": ""
+      },
+      "milestonename": {
+        "order": 26,
+        "text": "Countdown label (shown when date is valid)",
+        "type": "textinput",
+        "value": "MILESTONE"
       }
     }
   }
