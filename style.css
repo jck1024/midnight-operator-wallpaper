@@ -356,3 +356,5 @@ body.eco .city-sign {animation-duration:17s}
  to {opacity:calc(.40 * var(--neon-mult));}
 }
 body.low-motion .neon-pulse {opacity:calc(.12 * var(--neon-mult));}
+
+/* v1.0: Retain v0.4 visual design intentionally. No disruptive style changes. */

@@ -1,6 +1,6 @@
 {
-  "title": "Midnight Operator v0.4 — Personalisation & Polish",
-  "description": "Offline, self-contained Wallpaper Engine web wallpaper. New colour themes, layouts, presets, independent dashboard toggles, lighting controls and an Eco mode; v0.3 audio, city ambience and widgets retained.",
+  "title": "Midnight Operator v1.0 — Stable Release",
+  "description": "Stable offline Wallpaper Engine web wallpaper. Pixel-art cyberpunk city, adaptive Spotify visualiser, World Clock, calendar, countdown, neon traffic and weather effects, three HUD themes, three layouts, display presets and Eco mode. Performance and packaging refined from accepted v0.4.",
   "type": "web",
   "file": "index.html",
   "preview": "preview.jpg",

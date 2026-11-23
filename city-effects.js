@@ -1,4 +1,4 @@
-/* MIDNIGHT OPERATOR v0.4 — Living City engine, retained.
+/* MIDNIGHT OPERATOR v1.0 — Living City engine, retained.
  * Lightweight deterministic 2D canvas overlay anchored to the drifting backdrop.
  * All local; no audio, network, image downloads, device access or API dependencies.
  * The city is atmospheric artwork, not a representation of real security telemetry.
@@ -45,6 +45,9 @@
       this.reflections = !!opts.reflections;
       this.reduced = !!opts.reduced;
       this.canvas.style.display=this.enabled?'':'none';
+      // Clear one time when static, rather than repeatedly erasing a full-screen
+      // canvas at 15/30 FPS while the effect is disabled or motion is reduced.
+      if (!this.enabled || this.activity===0 || this.reduced) this.ctx.clearRect(0,0,this.w,this.h);
     }
     resize(w,h,dpr) {
       this.w=Math.max(1,w*1.036);this.h=Math.max(1,h*1.036);
@@ -55,8 +58,8 @@
     }
     paint(now,dt) {
       const c=this.ctx,w=this.w,h=this.h;
-      c.clearRect(0,0,w,h);
       if(!this.enabled || this.activity===0 || this.reduced) return;
+      c.clearRect(0,0,w,h);
       this.draws++;
       const t=now/1000;
       const level=this.activity/100;

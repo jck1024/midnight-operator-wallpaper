@@ -1,4 +1,4 @@
-/* MIDNIGHT OPERATOR 0.4.0 — standalone Wallpaper Engine web wallpaper.
+/* MIDNIGHT OPERATOR 1.0.0 — standalone Wallpaper Engine web wallpaper.
  * No remote scripts, analytics, network calls or artificial music animation.
  * Audio samples and media metadata come ONLY from Wallpaper Engine callbacks.
  * Diagnostic UI distinguishes callback registration from receiving real samples.
@@ -36,6 +36,22 @@
   let hasMedia = false, lastAudioUiAt = 0, lastDiagAt = 0;
   let previousCalendarDay = '';
   const reducedMotion = () => active.reducedMotion || motionPreference;
+  // Initialise these once: constructing Intl formatters each second is avoidable.
+  const clockFormatters = {
+    'Europe/London': {
+      time: new Intl.DateTimeFormat('en-GB', {timeZone:'Europe/London', hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'}),
+      date: new Intl.DateTimeFormat('en-GB', {timeZone:'Europe/London', day:'2-digit', month:'short', year:'numeric'})
+    },
+    'Asia/Hong_Kong': {
+      time: new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Hong_Kong', hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'}),
+      date: new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Hong_Kong', day:'2-digit', month:'short', year:'numeric'})
+    }
+  };
+  const ukCalendarFormatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone:'Europe/London', year:'numeric', month:'2-digit', day:'2-digit'
+  });
+  const monthFormatter = new Intl.DateTimeFormat('en-GB', {month:'long', timeZone:'UTC'});
+  let spectrumWidth = 0, spectrumHeight = 0;
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
   const themePalettes = {
@@ -67,6 +83,7 @@
     document.documentElement.style.setProperty('--dash-width', Math.min(desired,Math.round(v*.42))+'px');
   }
   function applySettings() {
+    const previous = active;
     active = deriveSettings();
     const body = document.body;
     body.dataset.theme = ['purple','green','blue'].includes(active.theme) ? active.theme : 'purple';
@@ -97,26 +114,29 @@
     renderFpsCap = Math.min(generalFpsCap, active.power === 'eco' ? 15 : 30);
     $('diag-preset').textContent = `PRESET: ${active.preset.toUpperCase()} | THEME: ${active.theme.toUpperCase()} | POWER: ${active.power.toUpperCase()}`;
     updateMilestone();
-    resizeRain(); // DPR changes with Eco mode; also refreshes city layer
-    resizeSpectrum();
+    // Only resize large canvases when DPR/performance profile changes. Frequent
+    // colour/volume/lighting slider moves must not reallocate them or restart rain.
+    if (previous.power !== active.power) resizeRain();
+    else if (previous.rain !== active.rain || previous.rainAmount !== active.rainAmount ||
+             previous.reducedMotion !== active.reducedMotion) makeRain();
+    if (previous.power !== active.power || previous.layout !== active.layout ||
+        previous.dashWidth !== active.dashWidth || previous.panelScale !== active.panelScale ||
+        previous.hud !== active.hud || previous.music !== active.music ||
+        previous.calendar !== active.calendar || previous.clock !== active.clock ||
+        previous.projects !== active.projects) resizeSpectrum();
     reportDiagnostics(performance.now());
   }
 
   // Real live clocks, with DST handled by IANA zones rather than fixed offsets.
-  function clockText(zone) {
-    const date = new Date();
-    return {
-      time: new Intl.DateTimeFormat('en-GB', {
-        timeZone: zone, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
-      }).format(date),
-      date: new Intl.DateTimeFormat('en-GB', {
-        timeZone: zone, day: '2-digit', month: 'short', year: 'numeric'
-      }).format(date)
-    };
+  function clockText(zone, date) {
+    const formatter = clockFormatters[zone];
+    return {time: formatter.time.format(date), date: formatter.date.format(date)};
   }
   function updateClocks() {
+    if (document.hidden) return; // refresh immediately when the tab becomes visible
+    const date = new Date();
     function update(zone, clockId, dateId) {
-      const v = clockText(zone);
+      const v = clockText(zone, date);
       const timeParts = v.time.split(':');
       // Only a fixed-format clock string is interpolated; no external markup.
       $(clockId).innerHTML = timeParts[0] + ':' + timeParts[1] + '<small>:' + timeParts[2] + '</small>';
@@ -124,9 +144,7 @@
     }
     update('Europe/London', 'time-uk', 'date-uk');
     update('Asia/Hong_Kong', 'time-hk', 'date-hk');
-    const parts = new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit'
-    }).formatToParts(new Date());
+    const parts = ukCalendarFormatter.formatToParts(date);
     const part = type => Number(parts.find(p => p.type === type).value);
     const year = part('year'), month = part('month'), day = part('day');
     const key = [year, month, day].join('-');
@@ -137,8 +155,7 @@
     updateMilestone();
   }
   function renderCalendar(year, month, day) {
-    const name = new Intl.DateTimeFormat('en-GB', {month: 'long', timeZone: 'UTC'})
-      .format(new Date(Date.UTC(year, month - 1, 1))).toUpperCase();
+    const name = monthFormatter.format(new Date(Date.UTC(year, month - 1, 1))).toUpperCase();
     $('cal-month').textContent = name;
     $('cal-year').textContent = String(year);
     const grid = $('calendar-grid');
@@ -206,8 +223,10 @@
   }
   function resizeSpectrum() {
     const bounds = spectrumCanvas.getBoundingClientRect();
-    spectrumCanvas.width = Math.max(1, Math.round(bounds.width * dpr));
-    spectrumCanvas.height = Math.max(1, Math.round(bounds.height * dpr));
+    spectrumWidth = bounds.width;
+    spectrumHeight = bounds.height;
+    spectrumCanvas.width = Math.max(1, Math.round(spectrumWidth * dpr));
+    spectrumCanvas.height = Math.max(1, Math.round(spectrumHeight * dpr));
     spectrumCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   function makeRain() {
@@ -224,8 +243,8 @@
     }));
   }
   function paintRain(dt) {
+    if (!active.rain || reducedMotion() || rainDrops.length === 0) return;
     rainCtx.clearRect(0, 0, width, height);
-    if (!active.rain || reducedMotion()) return;
     for (const drop of rainDrops) {
       drop.x -= drop.speed * dt * .17;
       drop.y += drop.speed * dt;
@@ -256,8 +275,7 @@
     return audioEngine.state(now);
   }
   function paintSpectrum(now, dt) {
-    const bounds = spectrumCanvas.getBoundingClientRect();
-    const w = bounds.width, h = bounds.height;
+    const w = spectrumWidth, h = spectrumHeight;
     if (!w || !h) return;
     spectrumCtx.clearRect(0, 0, w, h);
     const bars = audioEngine.update(now, dt);
@@ -304,9 +322,9 @@
     if (now - previousFrame < delay) return;
     const dt = clamp((now - previousFrame) / 1000, 0, .075);
     previousFrame = now;
-    paintRain(dt);
-    cityEngine.paint(now,dt);
-    if (active.music) paintSpectrum(now, dt);
+    if (active.rain && !reducedMotion() && rainDrops.length) paintRain(dt);
+    if (active.cityEffects && active.cityActivity > 0 && !reducedMotion()) cityEngine.paint(now,dt);
+    if (active.hud && active.music) paintSpectrum(now, dt);
     drawnFrames++;
     if (now - fpsMeasuredAt > 1050) {
       renderFps = drawnFrames * 1000 / (now - fpsMeasuredAt);
@@ -402,7 +420,7 @@
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {updateWidth(); resizeRain(); resizeSpectrum();}, 120);
   }, {passive: true});
-  window.addEventListener('visibilitychange', () => {previousFrame = performance.now();});
+  window.addEventListener('visibilitychange', () => {previousFrame = performance.now(); if (!document.hidden) updateClocks();});
   resizeRain();
   resizeSpectrum();
   applySettings();
