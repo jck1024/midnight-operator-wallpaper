@@ -1,4 +1,4 @@
-/* MIDNIGHT OPERATOR v0.3 — audio spectrum with optional quiet-input normalisation.
+/* MIDNIGHT OPERATOR v0.4 — audio engine retained from v0.3 spectrum with optional quiet-input normalisation.
  * Audio-only input from Wallpaper Engine callbacks. Never synthesize musical bars.
  */
 (function (root) {

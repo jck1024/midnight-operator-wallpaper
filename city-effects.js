@@ -1,4 +1,4 @@
-/* MIDNIGHT OPERATOR v0.3 — Living City.
+/* MIDNIGHT OPERATOR v0.4 — Living City engine, retained.
  * Lightweight deterministic 2D canvas overlay anchored to the drifting backdrop.
  * All local; no audio, network, image downloads, device access or API dependencies.
  * The city is atmospheric artwork, not a representation of real security telemetry.

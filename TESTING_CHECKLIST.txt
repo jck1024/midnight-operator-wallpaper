@@ -1,27 +1,44 @@
-MIDNIGHT OPERATOR v0.3 — ACCEPTANCE TESTS
-========================================
-Check only what you have VERIFIED. Unchecked = NOT CONFIRMED, not failed.
+MIDNIGHT OPERATOR v0.4.0 — ACCEPTANCE CHECKLIST
 
-[ ] 1. v0.3 imports separately, v0.2.1 remains selectable.
-[ ] 2. City signs visibly flicker occasionally, and can be toggled off.
-[ ] 3. City window glows, train/traffic and drones show subtle movement.
-[ ] 4. Balcony reflections move and can be toggled off.
-[ ] 5. City activity slider changes the visible effects.
-[ ] 6. Master Living City toggle removes the added city layer.
-[ ] 7. Spotify audio visualiser works with app volume BELOW 60%, and sound stays unchanged.
-[ ] 8. Silence produces idle bars and audio fades after music stops.
-[ ] 9. Clock/calendar/countdown/music metadata/rain and panel settings still work.
-[ ] 10. Reduced Motion and Wallpaper Engine pause/fullscreen behavior still work.
-[ ] 11. Dashboard fits your display; icons, taskbar, and countdown don't overlap.
-[ ] 12. CPU/GPU/RAM, fan, battery usage acceptable compared with v0.2.1.
-[ ] 13. Settings survive restart and wallpaper resumes from sleep.
+Mark PASS, FAIL or NOT TESTED. Untested must never be treated as failed.
 
-Recommended audio test: listen at your NORMAL safe listening volume,
-not an artificially high one. Test Spotify app volume near 30%, 50% and 70%.
-Enable Diagnostics to check ACTIVE/QUIET/WAITING and RAW PEAK. If the visualiser
-appears to animate in complete silence, turn Normalise quieter audio OFF
-and report the effect plus RAW PEAK diagnostic.
+INSTALLATION / ROLLBACK
+[ ] v0.4 imports under its own name and v0.3 remains available.
+[ ] Artwork and dashboard appear correctly at my normal screen resolution.
 
-Notes / unexpected issues:
+COLOUR & LAYOUT
+[ ] Cyberpunk Purple theme works, and Matrix Green and Midnight Blue visibly recolour the HUD.
+[ ] Right/classic and Left/mirrored layouts work without panels overlapping the title.
+[ ] Compact layout keeps the World Clock, Now Playing, Calendar readable.
+[ ] Dashboard width slider changes the layout without clipping.
+[ ] Individual widget visibility toggles work in Custom preset.
 
+PRESETS & LIGHTING
+[ ] Night Shift preset shows full dashboard with stronger city activity.
+[ ] Focus preset leaves clock/calendar while hiding extra panels.
+[ ] Cinematic preset hides the dashboard and keeps the city artwork.
+[ ] Switching back to Custom restores my individually selected settings.
+[ ] Restore original appearance displays the accepted original style (without erasing saved custom settings).
+[ ] City artwork brightness and neon atmosphere intensity sliders visibly change their intended layers.
 
+FEATURE REGRESSION
+[ ] Spotify metadata, album image and audio spectrum still work at typical 30–50% Spotify volume.
+[ ] Visualiser returns to idle when playback stops.
+[ ] London/Hong Kong clocks, calendar and configured countdown remain accurate.
+[ ] Rain, animated signs, city traffic, reflections and low motion all behave normally.
+[ ] Settings persist after Wallpaper Engine restart and wallpaper resumes after sleep/wake.
+
+PERFORMANCE
+[ ] CPU/GPU/RAM and fan noise remain acceptable relative to v0.3.
+[ ] Eco mode reduces effects/FPS and does not cause strange freezing or artefacts.
+[ ] Wallpaper pauses/stops for fullscreen games and VirtualBox as configured.
+
+RECOMMENDED SHORT TEST:
+  (1) Custom > purple > right > balanced; check baseline.
+  (2) Switch to green, then blue; check all text and song visualiser.
+  (3) Switch left, then compact; check panels at your laptop resolution.
+  (4) Switch Focus, Cinematic, Night Shift; return to Custom.
+  (5) Play Spotify at ordinary volume and check actual response.
+  (6) Enable Eco for several minutes; compare Task Manager with Balanced.
+
+If any feature fails, note the theme/preset/layout settings and screen resolution.

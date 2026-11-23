@@ -1,4 +1,4 @@
-/* MIDNIGHT OPERATOR 0.3.0 — standalone Wallpaper Engine web wallpaper.
+/* MIDNIGHT OPERATOR 0.4.0 — standalone Wallpaper Engine web wallpaper.
  * No remote scripts, analytics, network calls or artificial music animation.
  * Audio samples and media metadata come ONLY from Wallpaper Engine callbacks.
  * Diagnostic UI distinguishes callback registration from receiving real samples.
@@ -18,11 +18,16 @@
     projects: true, music: true, scanlines: true, reducedMotion: false,
     panelScale: 108, audioSensitivity: 125, visualIntensity: 125, bassBoost: 125, diagnostics: false, showMilestone: true,
     cityEffects: true, cityActivity: 70, citySigns: true, cityTraffic: true, cityReflections: true, quietBoost: true,
-    milestoneDate: '', milestoneName: 'MILESTONE'
+    milestoneDate: '', milestoneName: 'MILESTONE',
+    preset: 'custom', theme: 'purple', layout: 'right', dashWidth: 100,
+    sceneBrightness: 100, neonStrength: 100, power: 'balanced',
+    clock: true, title: true, footer: true
   };
 
+  let active = {...settings};
+  let currentTheme = {primary: "#c281ff", high: "#e792ff", mint: "#67ebdc"};
   let width = 1, height = 1, dpr = 1, rainDrops = [], paused = false;
-  let renderFpsCap = 30, previousFrame = 0, drawnFrames = 0, renderFps = 0;
+  let generalFpsCap = 30, renderFpsCap = 30, previousFrame = 0, drawnFrames = 0, renderFps = 0;
   let fpsMeasuredAt = performance.now();
   const audioEngine = new window.MidnightAudioEngine(40);
   const cityEngine = new window.MidnightCityEffects(cityCanvas);
@@ -30,27 +35,70 @@
   let audioCallbacks = 0, lastAudioAt = -Infinity, audioPeak = 0;
   let hasMedia = false, lastAudioUiAt = 0, lastDiagAt = 0;
   let previousCalendarDay = '';
-  const reducedMotion = () => settings.reducedMotion || motionPreference;
+  const reducedMotion = () => active.reducedMotion || motionPreference;
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
+  const themePalettes = {
+    purple: {primary:'#c281ff',high:'#e792ff',mint:'#67ebdc'},
+    green:  {primary:'#69f3b1',high:'#a6ffc5',mint:'#63ebce'},
+    blue:   {primary:'#7caeff',high:'#afd8ff',mint:'#74e2f4'}
+  };
+  const presetOverrides = {
+    night: {hud:true,clock:true,calendar:true,music:true,projects:true,title:true,footer:true,
+      sceneBrightness:100,neonStrength:120,cityActivity:80,rainAmount:68},
+    focus: {hud:true,clock:true,calendar:true,music:false,projects:false,title:false,footer:false,
+      cityActivity:25,rainAmount:25,neonStrength:35},
+    cinematic: {hud:false,sceneBrightness:108,cityActivity:85,rainAmount:68,neonStrength:110},
+    original: {hud:true,clock:true,calendar:true,music:true,projects:true,title:true,footer:true,
+      theme:'purple',layout:'right',dashWidth:100,panelScale:108,sceneBrightness:100,
+      neonStrength:100,cityActivity:70,rainAmount:68,scanlines:true,showMilestone:false,
+      rain:true,cityEffects:true,citySigns:true,cityTraffic:true,cityReflections:true,
+      reducedMotion:false, power:'balanced'}
+  };
+  function deriveSettings() {
+    const preset = presetOverrides[settings.preset] || {};
+    return Object.assign({}, settings, preset);
+  }
+  function updateWidth() {
+    const v = window.innerWidth;
+    const base = v <= 930 ? 270 : v <= 1490 ? clamp(v * .265, 312, 365) : clamp(v * .256, 344, 418);
+    const factor = active.layout === 'compact' ? .87 : 1;
+    const desired = Math.round(base * clamp(active.dashWidth, 85, 115) / 100 * factor);
+    document.documentElement.style.setProperty('--dash-width', Math.min(desired,Math.round(v*.42))+'px');
+  }
   function applySettings() {
-    document.body.classList.toggle('cinematic', !settings.hud);
-    document.body.classList.toggle('no-rain', !settings.rain);
-    document.body.classList.toggle('no-calendar', !settings.calendar);
-    document.body.classList.toggle('no-project', !settings.projects);
-    document.body.classList.toggle('no-music', !settings.music);
-    document.body.classList.toggle('no-scan', !settings.scanlines);
-    document.body.classList.toggle('low-motion', reducedMotion());
-    document.body.classList.toggle('no-city', !settings.cityEffects);
-    document.body.classList.toggle('no-signs', !settings.citySigns);
-    cityEngine.configure({enabled:settings.cityEffects, activity:settings.cityActivity, signs:settings.citySigns, traffic:settings.cityTraffic, reflections:settings.cityReflections, reduced:reducedMotion()});
-    document.documentElement.style.setProperty('--panel-scale', String(clamp(settings.panelScale, 90, 120) / 100));
-    $('diagnostics').hidden = !settings.diagnostics;
-    $('rain').style.display = (settings.rain && !reducedMotion()) ? '' : 'none';
-    audioEngine.configure({sensitivity:settings.audioSensitivity, intensity:settings.visualIntensity, bass:settings.bassBoost, quietBoost:settings.quietBoost});
+    active = deriveSettings();
+    const body = document.body;
+    body.dataset.theme = ['purple','green','blue'].includes(active.theme) ? active.theme : 'purple';
+    body.classList.toggle('cinematic', !active.hud);
+    body.classList.toggle('no-rain', !active.rain);
+    body.classList.toggle('no-calendar', !active.calendar);
+    body.classList.toggle('no-project', !active.projects);
+    body.classList.toggle('no-music', !active.music);
+    body.classList.toggle('no-clock', !active.clock);
+    body.classList.toggle('no-title', !active.title);
+    body.classList.toggle('no-footer', !active.footer);
+    body.classList.toggle('no-scan', !active.scanlines);
+    body.classList.toggle('low-motion', reducedMotion());
+    body.classList.toggle('no-city', !active.cityEffects);
+    body.classList.toggle('no-signs', !active.citySigns);
+    body.classList.toggle('layout-left', active.layout === 'left');
+    body.classList.toggle('layout-compact', active.layout === 'compact');
+    body.classList.toggle('eco', active.power === 'eco');
+    cityEngine.configure({enabled:active.cityEffects, activity:active.cityActivity * (active.power === 'eco' ? .68 : 1), signs:active.citySigns, traffic:active.cityTraffic, reflections:active.cityReflections, reduced:reducedMotion()});
+    document.documentElement.style.setProperty('--panel-scale', String(clamp(active.panelScale, 90, 120) / 100));
+    document.documentElement.style.setProperty('--scene-brightness', String(clamp(active.sceneBrightness,65,125)/100));
+    document.documentElement.style.setProperty('--neon-mult', String(clamp(active.neonStrength,0,160)/100));
+    updateWidth();
+    $('diagnostics').hidden = !active.diagnostics;
+    $('rain').style.display = (active.rain && !reducedMotion()) ? '' : 'none';
+    currentTheme = themePalettes[body.dataset.theme];
+    audioEngine.configure({sensitivity:active.audioSensitivity, intensity:active.visualIntensity, bass:active.bassBoost, quietBoost:active.quietBoost});
+    renderFpsCap = Math.min(generalFpsCap, active.power === 'eco' ? 15 : 30);
+    $('diag-preset').textContent = `PRESET: ${active.preset.toUpperCase()} | THEME: ${active.theme.toUpperCase()} | POWER: ${active.power.toUpperCase()}`;
     updateMilestone();
+    resizeRain(); // DPR changes with Eco mode; also refreshes city layer
     resizeSpectrum();
-    makeRain();
     reportDiagnostics(performance.now());
   }
 
@@ -121,8 +169,8 @@
   }
   function updateMilestone() {
     const box = $('milestone');
-    const date = String(settings.milestoneDate || '');
-    if (!settings.showMilestone || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const date = String(active.milestoneDate || '');
+    if (!active.showMilestone || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       box.hidden = true;
       return;
     }
@@ -133,7 +181,7 @@
       return;
     }
     box.hidden = false;
-    $('milestone-name').textContent = String(settings.milestoneName || 'MILESTONE').slice(0, 40);
+    $('milestone-name').textContent = String(active.milestoneName || 'MILESTONE').slice(0, 40);
     const difference = target.getTime() - Date.now();
     if (difference <= 0) {
       $('milestone-value').textContent = 'MILESTONE REACHED';
@@ -149,7 +197,7 @@
   function resizeRain() {
     width = Math.max(1, window.innerWidth);
     height = Math.max(1, window.innerHeight);
-    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    dpr = Math.min(window.devicePixelRatio || 1, active.power === 'eco' ? 1 : 1.5);
     rainCanvas.width = Math.round(width * dpr);
     rainCanvas.height = Math.round(height * dpr);
     rainCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -163,8 +211,8 @@
     spectrumCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   function makeRain() {
-    const density = settings.rain && !reducedMotion() ? clamp(Number(settings.rainAmount), 0, 100) / 100 : 0;
-    const count = Math.min(240, Math.round((width * height / 8200) * density));
+    const density = active.rain && !reducedMotion() ? clamp(Number(active.rainAmount), 0, 100) / 100 : 0;
+    const count = Math.min(240, Math.round((width * height / 8200) * density * (active.power === 'eco' ? .62 : 1)));
     rainDrops = Array.from({length: count}, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -177,7 +225,7 @@
   }
   function paintRain(dt) {
     rainCtx.clearRect(0, 0, width, height);
-    if (!settings.rain || reducedMotion()) return;
+    if (!active.rain || reducedMotion()) return;
     for (const drop of rainDrops) {
       drop.x -= drop.speed * dt * .17;
       drop.y += drop.speed * dt;
@@ -220,10 +268,10 @@
       const value = bars[i];
       const actualHeight = Math.max(2, value * (h - 3));
       const x = i * (barWidth + gap), y = h - actualHeight;
-      spectrumCtx.fillStyle = value > .46 ? 'rgba(231,146,255,.97)' : 'rgba(170,124,234,.82)';
+      spectrumCtx.fillStyle = value > .46 ? currentTheme.high : currentTheme.primary;
       spectrumCtx.fillRect(x, y, Math.max(1, barWidth), actualHeight);
       if (value > .10) {
-        spectrumCtx.fillStyle = 'rgba(103,235,220,.9)';
+        spectrumCtx.fillStyle = currentTheme.mint;
         spectrumCtx.fillRect(x, y, Math.max(1, barWidth), 2);
       }
     }
@@ -233,15 +281,15 @@
       else if (mode === 'quiet') indicator.textContent = 'AUDIO INPUT // QUIET';
       else if (mode === 'waiting') indicator.textContent = 'AUDIO INPUT // WAITING';
       else indicator.textContent = 'AUDIO INPUT // WALLPAPER ENGINE ONLY';
-      $('audio-pip').style.background = mode === 'active' ? '#67ebdc' : '#d176ef';
+      $('audio-pip').style.background = mode === 'active' ? currentTheme.mint : currentTheme.primary;
       lastAudioUiAt = now;
     }
   }
 
   function reportDiagnostics(now) {
-    if (!settings.diagnostics) return;
+    if (!active.diagnostics) return;
     const motion = reducedMotion() ? 'REDUCED' : paused ? 'PAUSED' : 'RUNNING';
-    $('diag-render').textContent = `MOTION: ${motion}  |  RAIN: ${rainDrops.length}  |  CITY: ${settings.cityEffects ? "ON" : "OFF"}  |  FPS: ${renderFps.toFixed(0)}`;
+    $('diag-render').textContent = `MOTION: ${motion}  |  RAIN: ${rainDrops.length}  |  CITY: ${active.cityEffects ? "ON" : "OFF"}  |  FPS: ${renderFps.toFixed(0)}`;
     const mode = audioMode(now).toUpperCase();
     const age = Number.isFinite(lastAudioAt) ? (now - lastAudioAt) / 1000 : null;
     $('diag-audio').textContent = `AUDIO: ${mode}  |  CALLBACKS: ${audioCallbacks}  |  RAW PEAK: ${audioPeak.toFixed(3)}  |  GAIN: ${audioEngine.gain.toFixed(1)}x  |  LAST: ${age === null ? 'NEVER' : age.toFixed(1) + 's'}`;
@@ -258,14 +306,14 @@
     previousFrame = now;
     paintRain(dt);
     cityEngine.paint(now,dt);
-    if (settings.music) paintSpectrum(now, dt);
+    if (active.music) paintSpectrum(now, dt);
     drawnFrames++;
     if (now - fpsMeasuredAt > 1050) {
       renderFps = drawnFrames * 1000 / (now - fpsMeasuredAt);
       drawnFrames = 0;
       fpsMeasuredAt = now;
     }
-    if (settings.diagnostics && now - lastDiagAt > 480) {
+    if (active.diagnostics && now - lastDiagAt > 480) {
       reportDiagnostics(now);
       lastDiagAt = now;
     }
@@ -304,7 +352,8 @@
 
   window.wallpaperPropertyListener = {
     applyGeneralProperties: function (props) {
-      if (Number(props.fps) > 0) renderFpsCap = clamp(Math.floor(Number(props.fps)), 1, 30);
+      if (Number(props.fps) > 0) generalFpsCap = clamp(Math.floor(Number(props.fps)), 1, 30);
+      renderFpsCap = Math.min(generalFpsCap, active.power === 'eco' ? 15 : 30);
     },
     setPaused: function (value) {
       paused = !!value;
@@ -323,7 +372,10 @@
         showdiagnostics: 'diagnostics',
         milestonedate: 'milestoneDate', milestonename: 'milestoneName',
         cityeffects: 'cityEffects', cityactivity: 'cityActivity', citysigns: 'citySigns',
-        citytraffic: 'cityTraffic', cityreflections: 'cityReflections', quietboost: 'quietBoost'
+        citytraffic: 'cityTraffic', cityreflections: 'cityReflections', quietboost: 'quietBoost',
+        displaypreset: 'preset', colortheme: 'theme', dashboardlayout: 'layout', dashboardwidth: 'dashWidth',
+        scenebrightness: 'sceneBrightness', neonstrength: 'neonStrength', powerprofile: 'power',
+        showclock: 'clock', showtitle: 'title', showfooter: 'footer'
       };
       Object.keys(map).forEach(key => {
         if (props[key] && Object.prototype.hasOwnProperty.call(props[key], 'value')) {
@@ -348,7 +400,7 @@
   let resizeTimer;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {resizeRain(); resizeSpectrum();}, 120);
+    resizeTimer = setTimeout(() => {updateWidth(); resizeRain(); resizeSpectrum();}, 120);
   }, {passive: true});
   window.addEventListener('visibilitychange', () => {previousFrame = performance.now();});
   resizeRain();

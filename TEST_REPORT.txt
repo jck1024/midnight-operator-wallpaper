@@ -1,32 +1,23 @@
-MIDNIGHT OPERATOR v0.3 — BUILD VALIDATION
-========================================
-SOURCE CHECKS
-- All .js files pass node --check.
-- project.json parses as valid JSON with general.supportsaudioprocessing=true.
-- Uses existing Wallpaper Engine web wallpaper APIs.
+MIDNIGHT OPERATOR v0.4.0 — BUILD VALIDATION
 
-BROWSER / SIMULATED WALLPAPER ENGINE CHECKS
-- Resolutions: 1920x1080, 1650x927, 1366x768, 1280x720, 1024x768.
-- No JavaScript page errors across 5 cases.
-- Main dashboard fits screen, countdown does not overlap calendar.
-- City master / neon sign toggle, reduced motion and pause behavior verified.
-- Real Wallpaper Engine audio callback interface stubbed with synthetic 128-sample arrays.
-- Low-level synthetic audio (0.002-0.004) reported ACTIVE.
-- v0.3 audio unit test: with synthetic PEAK ~0.0037, bars visible;
-  prior v0.2.1 treated the same input as QUIET. True zeros produced no bars.
-- Audio bars decay toward zero after callbacks stop.
-- Browser previews are illustrative, NOT captures of a real Spotify session.
+BASELINE
+Source package: Midnight_Operator_v0.3_RELEASE.zip (the user's accepted release).
+All code and artwork remain local; no external scripts or required network calls.
 
-NOT VERIFIED IN THIS ENVIRONMENT
-- Real Spotify audio capture in installed Wallpaper Engine.
-- Real Windows playback-device interactions and audio hiss/noise gating.
-- Actual Ryzen laptop CPU/GPU/RAM, heat or battery consumption.
-- Wallpaper Engine installation/import on the user's machine.
-- User property persistence across full Wallpaper Engine restart and system wake.
+AUTOMATED CHECKS
+- JSON validation of project.json and JS syntax checks: passed.
+- 32 property identifiers, including new theme/layout/preset/brightness/Eco controls.
+- 64 offline mock integration assertions: passed.
+- Includes checks for clocks/calendar, Wallpaper Engine audio callback registration,
+  themes, layouts, per-widget toggles, 4 display presets, city brightness and neon
+  properties, dashboard width, countdown, diagnostics, Eco particle reduction,
+  reduced motion, pause/resume, and the complete property payload.
+- Property combo structure checked against Wallpaper Engine documented 'label'/'value' format.
 
-CHECK RESULTS BY RESOLUTION
-- 1920x1080: PASS
-- 1650x927: PASS
-- 1366x768: PASS
-- 1280x720: PASS
-- 1024x768: PASS
+LIMITATIONS
+- Live browser rendering was attempted but Chromium page navigation is blocked by
+  this environment (ERR_BLOCKED_BY_ADMINISTRATOR), both file:// and localhost.
+- Real Wallpaper Engine, Spotify behaviour, preferences persistence, actual FPS/GPU/RAM,
+  and visual overlap require user acceptance testing.
+- Existing v0.3 previews were used as visual reference for the default layout, not
+  evidence of new v0.4 UI modes being rendered.

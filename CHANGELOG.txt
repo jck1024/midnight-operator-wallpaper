@@ -1,13 +1,19 @@
-MIDNIGHT OPERATOR v0.3.0 — LIVING CITY
-====================================
-New: Subtle asynchronous neon window glows on skyline buildings.
-New: Two flickering city signs; user-toggleable.
-New: Tiny moving rail traffic lights and distant navigational lights.
-New: Wet balcony glints/reflections; separately toggleable.
-New: Master city effects on/off and city activity control (0-100%).
-Improved: Low-volume Spotify response through optional quiet-input normalisation.
-Preserved: Existing clocks, calendar, workspace, countdown, Spotify media metadata,
-           rain, haze, city drift, visualiser controls, diagnostics, pause/FPS and
-           reduced-motion behavior.
-Performance: Added canvas DPR cap of 1.25 and static window layout; no remote assets.
-Migration: Separate import; v0.2.1 is not touched.
+MIDNIGHT OPERATOR — CHANGELOG
+
+v0.4.0 — Personalisation & Polish
+- Added 3 HUD colour themes: Cyberpunk Purple, Matrix Green, Midnight Blue.
+- Added 3 dashboard layouts: Right/classic, Left/mirrored, Compact right.
+- Added user-controlled dashboard width and scene brightness.
+- Added separate neon ambience intensity control.
+- Added customisable display presets: Custom, Night Shift, Focus, Cinematic,
+  Original Appearance override (visual only, does not erase saved settings).
+- Added individual World Clock, wallpaper title and footer toggles.
+- Retained separate Calendar, Music, Workspace, Countdown and HUD controls.
+- Added Eco mode: 15 FPS cap, fewer rain particles, and lower city-overlay
+  activity / canvas DPR limit (subject to lower Wallpaper Engine FPS limits).
+- Extended diagnostics with preset/theme/power readout.
+- Kept v0.3 quiet-volume audio visualiser, city effects and offline assets.
+- Updated project metadata and version to 0.4.0.
+
+Baseline: v0.3.0 was accepted by the user with 12/12 tests passing.
+Compatibility: Web Wallpaper; imports separately; v0.3 should be retained.

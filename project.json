@@ -1,6 +1,6 @@
 {
-  "title": "Midnight Operator v0.3 — Living City",
-  "description": "Offline Wallpaper Engine web wallpaper. Living City visual upgrade: animated neon signage, skyline window flicker, elevated traffic lights, distant drones, rain reflections; quiet-volume audio normalisation and performance controls. v0.2.1 dashboard retained.",
+  "title": "Midnight Operator v0.4 — Personalisation & Polish",
+  "description": "Offline, self-contained Wallpaper Engine web wallpaper. New colour themes, layouts, presets, independent dashboard toggles, lighting controls and an Eco mode; v0.3 audio, city ambience and widgets retained.",
   "type": "web",
   "file": "index.html",
   "preview": "preview.jpg",
@@ -15,14 +15,209 @@
   "general": {
     "supportsaudioprocessing": true,
     "properties": {
-      "cityeffects": {
+      "displaypreset": {
         "order": 1,
+        "text": "DISPLAY PRESET (Custom = individual controls)",
+        "type": "combo",
+        "value": "custom",
+        "options": [
+          {
+            "value": "custom",
+            "label": "Custom controls"
+          },
+          {
+            "value": "night",
+            "label": "Night Shift"
+          },
+          {
+            "value": "focus",
+            "label": "Focus"
+          },
+          {
+            "value": "cinematic",
+            "label": "Cinematic"
+          },
+          {
+            "value": "original",
+            "label": "Restore original appearance"
+          }
+        ]
+      },
+      "colortheme": {
+        "order": 2,
+        "text": "HUD colour theme",
+        "type": "combo",
+        "value": "purple",
+        "options": [
+          {
+            "value": "purple",
+            "label": "Cyberpunk Purple"
+          },
+          {
+            "value": "green",
+            "label": "Matrix Green"
+          },
+          {
+            "value": "blue",
+            "label": "Midnight Blue"
+          }
+        ]
+      },
+      "dashboardlayout": {
+        "order": 3,
+        "text": "Dashboard layout",
+        "type": "combo",
+        "value": "right",
+        "options": [
+          {
+            "value": "right",
+            "label": "Right / classic"
+          },
+          {
+            "value": "left",
+            "label": "Left / mirrored"
+          },
+          {
+            "value": "compact",
+            "label": "Compact right"
+          }
+        ]
+      },
+      "dashboardwidth": {
+        "order": 4,
+        "text": "Dashboard width (%)",
+        "type": "slider",
+        "value": 100,
+        "min": 85,
+        "max": 115,
+        "step": 5
+      },
+      "scenebrightness": {
+        "order": 5,
+        "text": "City artwork brightness (%)",
+        "type": "slider",
+        "value": 100,
+        "min": 65,
+        "max": 125,
+        "step": 5
+      },
+      "neonstrength": {
+        "order": 6,
+        "text": "Neon atmosphere intensity (%)",
+        "type": "slider",
+        "value": 100,
+        "min": 0,
+        "max": 160,
+        "step": 5
+      },
+      "powerprofile": {
+        "order": 7,
+        "text": "Performance profile",
+        "type": "combo",
+        "value": "balanced",
+        "options": [
+          {
+            "value": "balanced",
+            "label": "Balanced (up to 30 FPS)"
+          },
+          {
+            "value": "eco",
+            "label": "Eco (15 FPS; fewer particles)"
+          }
+        ]
+      },
+      "showclock": {
+        "order": 8,
+        "text": "Show World Clock",
+        "type": "bool",
+        "value": true
+      },
+      "showtitle": {
+        "order": 9,
+        "text": "Show wallpaper title",
+        "type": "bool",
+        "value": true
+      },
+      "showfooter": {
+        "order": 10,
+        "text": "Show bottom captions",
+        "type": "bool",
+        "value": true
+      },
+      "showhud": {
+        "order": 11,
+        "text": "Dashboard / cinematic mode",
+        "type": "bool",
+        "value": true
+      },
+      "showmusic": {
+        "order": 12,
+        "text": "Show Now Playing and spectrum",
+        "type": "bool",
+        "value": true
+      },
+      "showcalendar": {
+        "order": 13,
+        "text": "Show calendar",
+        "type": "bool",
+        "value": true
+      },
+      "showprojects": {
+        "order": 14,
+        "text": "Show workspace projects",
+        "type": "bool",
+        "value": true
+      },
+      "showmilestone": {
+        "order": 15,
+        "text": "Show countdown (requires a target date)",
+        "type": "bool",
+        "value": true
+      },
+      "milestonedate": {
+        "order": 16,
+        "text": "Countdown target date (YYYY-MM-DD; blank = hidden)",
+        "type": "textinput",
+        "value": ""
+      },
+      "milestonename": {
+        "order": 17,
+        "text": "Countdown label (shown when date is valid)",
+        "type": "textinput",
+        "value": "MILESTONE"
+      },
+      "uiscale": {
+        "order": 18,
+        "text": "Key dashboard text / artwork size (%)",
+        "type": "slider",
+        "value": 108,
+        "min": 90,
+        "max": 120,
+        "step": 2
+      },
+      "showrain": {
+        "order": 21,
+        "text": "Rain animation",
+        "type": "bool",
+        "value": true
+      },
+      "rainamount": {
+        "order": 22,
+        "text": "Rain intensity",
+        "type": "slider",
+        "value": 68,
+        "min": 0,
+        "max": 100,
+        "step": 1
+      },
+      "cityeffects": {
+        "order": 23,
         "text": "Living city effects",
         "type": "bool",
         "value": true
       },
       "cityactivity": {
-        "order": 2,
+        "order": 24,
         "text": "City activity / effect brightness (%)",
         "type": "slider",
         "value": 70,
@@ -31,79 +226,37 @@
         "step": 5
       },
       "citysigns": {
-        "order": 3,
+        "order": 25,
         "text": "Animated neon signs",
         "type": "bool",
         "value": true
       },
       "citytraffic": {
-        "order": 4,
+        "order": 26,
         "text": "Elevated traffic and distant drones",
         "type": "bool",
         "value": true
       },
       "cityreflections": {
-        "order": 5,
+        "order": 27,
         "text": "Balcony rain reflections",
         "type": "bool",
         "value": true
       },
-      "quietboost": {
-        "order": 6,
-        "text": "Normalise quieter audio (experimental)",
+      "showscanlines": {
+        "order": 28,
+        "text": "Subtle scanlines",
         "type": "bool",
         "value": true
       },
-      "showrain": {
-        "order": 11,
-        "text": "Rain animation",
+      "reducedmotion": {
+        "order": 29,
+        "text": "Reduced motion (disable moving effects)",
         "type": "bool",
-        "value": true
-      },
-      "rainamount": {
-        "order": 12,
-        "text": "Rain intensity",
-        "type": "slider",
-        "value": 68,
-        "min": 0,
-        "max": 100,
-        "step": 1
-      },
-      "showhud": {
-        "order": 13,
-        "text": "Dashboard / cinematic mode",
-        "type": "bool",
-        "value": true
-      },
-      "showcalendar": {
-        "order": 14,
-        "text": "Show calendar",
-        "type": "bool",
-        "value": true
-      },
-      "showprojects": {
-        "order": 15,
-        "text": "Show workspace projects",
-        "type": "bool",
-        "value": true
-      },
-      "showmusic": {
-        "order": 16,
-        "text": "Show Now Playing and spectrum",
-        "type": "bool",
-        "value": true
-      },
-      "uiscale": {
-        "order": 17,
-        "text": "Key dashboard text / artwork size (%)",
-        "type": "slider",
-        "value": 108,
-        "min": 90,
-        "max": 120,
-        "step": 2
+        "value": false
       },
       "audiosensitivity": {
-        "order": 18,
+        "order": 31,
         "text": "Audio sensitivity / input gain (%)",
         "type": "slider",
         "value": 125,
@@ -112,7 +265,7 @@
         "step": 5
       },
       "visualintensity": {
-        "order": 19,
+        "order": 32,
         "text": "Visualiser bar intensity (%)",
         "type": "slider",
         "value": 125,
@@ -121,7 +274,7 @@
         "step": 5
       },
       "bassboost": {
-        "order": 20,
+        "order": 33,
         "text": "Visualiser bass emphasis (%)",
         "type": "slider",
         "value": 125,
@@ -129,41 +282,17 @@
         "max": 200,
         "step": 5
       },
-      "showscanlines": {
-        "order": 21,
-        "text": "Subtle scanlines",
+      "quietboost": {
+        "order": 34,
+        "text": "Normalise quieter audio (experimental)",
         "type": "bool",
         "value": true
       },
-      "reducedmotion": {
-        "order": 22,
-        "text": "Reduced motion (disable moving effects)",
-        "type": "bool",
-        "value": false
-      },
       "showdiagnostics": {
-        "order": 23,
+        "order": 35,
         "text": "Show diagnostics (real motion and audio callback state)",
         "type": "bool",
         "value": false
-      },
-      "showmilestone": {
-        "order": 24,
-        "text": "Show countdown (requires a target date)",
-        "type": "bool",
-        "value": true
-      },
-      "milestonedate": {
-        "order": 25,
-        "text": "Countdown target date (YYYY-MM-DD; blank = hidden)",
-        "type": "textinput",
-        "value": ""
-      },
-      "milestonename": {
-        "order": 26,
-        "text": "Countdown label (shown when date is valid)",
-        "type": "textinput",
-        "value": "MILESTONE"
       }
     }
   }
