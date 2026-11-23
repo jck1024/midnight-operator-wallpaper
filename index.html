@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Midnight Operator — Wallpaper Engine</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="wallpaper" aria-label="Midnight Operator animated wallpaper">
+    <div class="scene" aria-hidden="true"></div>
+    <div class="scene-glow" aria-hidden="true"></div>
+    <div class="far-fog" aria-hidden="true"></div>
+    <div class="train" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <canvas id="rain" aria-hidden="true"></canvas>
+    <div class="scanline" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <div class="top-marker">
+      <div class="title-lockup">
+        <div class="title-kicker"><span class="status-pip"></span> PERSONAL ENVIRONMENT <span class="thin-slash">//</span> NIGHT SHIFT</div>
+        <h1>MIDNIGHT <em>OPERATOR</em></h1>
+        <div class="title-sub">A QUIET PLACE ABOVE THE NOISE <span class="line"></span> 0.1.0</div>
+      </div>
+    </div>
+
+    <section id="dash" class="dash" aria-label="Live information">
+      <div class="pane world-pane">
+        <div class="pane-head"><span class="diamond">◇</span> WORLD CLOCK <span class="pane-index">01 / LIVE</span></div>
+        <div class="clock-grid">
+          <div class="clock-item"><div class="clock-location">LONDON <span>GMT / BST</span></div><div class="clock-time" id="time-uk">--:--<small>:--</small></div><div class="clock-date" id="date-uk">-- --- ----</div></div>
+          <div class="clock-item"><div class="clock-location">HONG KONG <span>HKT</span></div><div class="clock-time" id="time-hk">--:--<small>:--</small></div><div class="clock-date" id="date-hk">-- --- ----</div></div>
+        </div>
+        <div class="pane-foot"><span class="live-dot"></span> LOCAL TIME SIGNAL <span id="time-zone-note">SYNCED TO CLOCK</span></div>
+      </div>
+
+      <div class="pane music-pane" id="music-pane">
+        <div class="pane-head"><span class="diamond">◇</span> NOW PLAYING <span class="pane-index">02 / AUDIO</span></div>
+        <div class="music-main">
+          <div class="album-box" id="album-box"><img id="album" alt="" hidden><span id="album-placeholder">♫</span></div>
+          <div class="music-copy"><div class="music-state" id="music-state">AWAITING MEDIA SESSION</div><div class="music-track" id="music-track">THE CITY IS QUIET</div><div class="music-artist" id="music-artist">Play music to connect</div></div>
+        </div>
+        <canvas id="spectrum" class="spectrum" aria-hidden="true"></canvas>
+        <div class="pane-foot"><span class="live-dot purple" id="audio-pip"></span><span id="audio-text">AUDIO REACTIVE / WALLPAPER ENGINE</span><span class="pane-foot-right">64 BANDS</span></div>
+      </div>
+
+      <div class="pane calendar-pane" id="calendar-pane">
+        <div class="pane-head"><span class="diamond">◇</span> CALENDAR <span class="pane-index">03 / MONTH</span></div>
+        <div class="month-head"><strong id="cal-month">NOVEMBER</strong><span id="cal-year">2026</span></div>
+        <div class="calendar-grid" id="calendar-grid"></div>
+        <div class="calendar-foot" id="calendar-foot">TODAY // --</div>
+      </div>
+
+      <div class="pane project-pane" id="project-pane">
+        <div class="pane-head"><span class="diamond">◇</span> WORKSPACE <span class="pane-index">04 / FOCUS</span></div>
+        <div class="project-chips"><span><b>01</b> CYBER LAB</span><span><b>02</b> PERSONAL AI</span><span><b>03</b> GAME DEV</span></div>
+        <div class="microcopy">THREE PATHS. ONE OPERATOR.</div>
+      </div>
+    </section>
+
+    <div id="milestone" class="milestone" hidden><div class="milestone-tag">UPCOMING // <span id="milestone-name">MILESTONE</span></div><div class="milestone-value" id="milestone-value">00D 00H 00M</div></div>
+
+    <div class="edge-label edge-left">M.O. <span>·</span> 00:00:00</div>
+    <div class="bottom-line"><span>NEON RAIN // SOMEWHERE IN THE CITY</span><span>PRESS ON · STAY CURIOUS <i class="blip"></i></span></div>
+    <div class="corner-mark mark-one"></div><div class="corner-mark mark-two"></div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

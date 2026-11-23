@@ -1,0 +1,24 @@
+{
+  "title": "Midnight Operator — Cyberpunk Night Shift",
+  "description": "An offline animated pixel-art neon city and quiet cyberpunk workstation. Real London/Hong Kong time, a live UK calendar, Wallpaper Engine system-audio spectrum and optional media-session metadata. Adjustable rain, UI, and custom milestone countdown. No trackers or network access.",
+  "type": "web",
+  "file": "index.html",
+  "preview": "preview.jpg",
+  "supportsaudioprocessing": true,
+  "tags": ["Cyberpunk", "Pixel Art", "Technology", "Relaxing", "Audio Responsive"],
+  "visibility": "private",
+  "general": {
+    "properties": {
+      "showrain": {"order": 1, "text": "Rain animation", "type": "bool", "value": true},
+      "rainamount": {"order": 2, "text": "Rain intensity", "type": "slider", "value": 45, "min": 0, "max": 100, "step": 1},
+      "showhud": {"order": 3, "text": "Show dashboard and labels (off = cinematic)", "type": "bool", "value": true},
+      "showcalendar": {"order": 4, "text": "Show calendar", "type": "bool", "value": true},
+      "showprojects": {"order": 5, "text": "Show project labels", "type": "bool", "value": true},
+      "showmusic": {"order": 6, "text": "Show audio and music", "type": "bool", "value": true},
+      "showscanlines": {"order": 7, "text": "Subtle scanlines", "type": "bool", "value": true},
+      "reducedmotion": {"order": 8, "text": "Reduce animation", "type": "bool", "value": false},
+      "milestonedate": {"order": 9, "text": "Optional countdown date (YYYY-MM-DD)", "type": "textinput", "value": ""},
+      "milestonename": {"order": 10, "text": "Countdown label", "type": "textinput", "value": "MILESTONE"}
+    }
+  }
+}
