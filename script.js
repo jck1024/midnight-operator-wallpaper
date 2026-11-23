@@ -1,159 +1,365 @@
-/* MIDNIGHT OPERATOR — offline, local Wallpaper Engine web wallpaper.
-   Live data: system audio spectrum (Wallpaper Engine), current media metadata
-   (Wallpaper Engine when supported), real London/Hong Kong time, calendar.
-   Project chips are decorative labels, NOT telemetry or external account links. */
-(function(){
-'use strict';
-const $=id=>document.getElementById(id);
-const rainCanvas=$('rain'),rainCtx=rainCanvas.getContext('2d',{alpha:true});
-const spectrumCanvas=$('spectrum'),spectrumCtx=spectrumCanvas.getContext('2d',{alpha:true});
-const settings={rain:true,rainAmount:45,hud:true,calendar:true,projects:true,music:true,scanlines:true,reducedMotion:false,milestoneDate:'',milestoneName:'MILESTONE'};
-let fpsLimit=24,paused=false,lastFrame=0,displayW=0,displayH=0,dpr=1;
-let drops=[],audioLevels=new Float32Array(64),smoothed=new Float32Array(40),lastAudioAt=0,hasMedia=false;
-const reduceUserMotion=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* MIDNIGHT OPERATOR 0.2.0 — standalone Wallpaper Engine web wallpaper.
+ * No remote scripts, analytics, network calls or artificial music animation.
+ * Audio samples and media metadata come ONLY from Wallpaper Engine callbacks.
+ * Diagnostic UI distinguishes callback registration from receiving real samples.
+ */
+(function () {
+  'use strict';
 
-function classSettings(){
-  document.body.classList.toggle('cinematic',!settings.hud);
-  document.body.classList.toggle('no-rain',!settings.rain);
-  document.body.classList.toggle('no-calendar',!settings.calendar);
-  document.body.classList.toggle('no-project',!settings.projects);
-  document.body.classList.toggle('no-music',!settings.music);
-  document.body.classList.toggle('no-scan',!settings.scanlines);
-  document.body.classList.toggle('low-motion',settings.reducedMotion||reduceUserMotion);
-  updateMilestone();
-  resetRain();
-}
-function fmtTime(zone){
-  const date=new Date();
-  const t=new Intl.DateTimeFormat('en-GB',{timeZone:zone,hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(date);
-  const dateString=new Intl.DateTimeFormat('en-GB',{timeZone:zone,day:'2-digit',month:'short',year:'numeric'}).format(date);
-  return {t,dateString};
-}
-let cachedMonth='';
-function updateClocks(){
-  const uk=fmtTime('Europe/London'),hk=fmtTime('Asia/Hong_Kong');
-  function write(timeId,dateId,values){ const parts=values.t.split(':');$(timeId).innerHTML=parts[0]+':'+parts[1]+'<small>:'+parts[2]+'</small>';$(dateId).textContent=values.dateString.toUpperCase();}
-  write('time-uk','date-uk',uk);write('time-hk','date-hk',hk);
-  const now=new Date();
-  const ukParts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
-  const value=type=>Number(ukParts.find(part=>part.type===type).value);
-  const y=value('year'),m=value('month'),d=value('day'),key=`${y}-${m}-${d}`;
-  if(cachedMonth!==key){cachedMonth=key;renderCalendar(y,m,d);}
-  updateMilestone();
-}
-function renderCalendar(year,month,day){
-  $('cal-month').textContent=new Intl.DateTimeFormat('en-GB',{month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(year,month-1,1))).toUpperCase();
-  $('cal-year').textContent=year;
-  const grid=$('calendar-grid');grid.replaceChildren();
-  ['M','T','W','T','F','S','S'].forEach(n=>{const div=document.createElement('div');div.textContent=n;div.className='dayhead';grid.appendChild(div);});
-  const first=(new Date(Date.UTC(year,month-1,1)).getUTCDay()+6)%7;
-  const count=new Date(Date.UTC(year,month,0)).getUTCDate();
-  const total=Math.ceil((first+count)/7)*7;
-  for(let cell=0;cell<total;cell++){
-    const n=cell-first+1;const div=document.createElement('div');div.className='date';
-    if(n<1||n>count){div.classList.add('outside');div.textContent='·';}
-    else {div.textContent=String(n).padStart(2,'0');if(n===day)div.classList.add('today');}
-    grid.appendChild(div);
-  }
-  $('calendar-foot').textContent=`TODAY // ${String(day).padStart(2,'0')} ${$('cal-month').textContent} ${year}`;
-}
-function updateMilestone(){
-  const box=$('milestone');
-  if(!settings.milestoneDate || !/^\d{4}-\d{2}-\d{2}$/.test(settings.milestoneDate)){box.hidden=true;return;}
-  const target=new Date(settings.milestoneDate+'T00:00:00');
-  if(isNaN(target.getTime())){box.hidden=true;return;}
-  box.hidden=false;$('milestone-name').textContent=settings.milestoneName||'MILESTONE';
-  const diff=target.getTime()-Date.now();
-  if(diff<=0){$('milestone-value').textContent='MILESTONE REACHED';return;}
-  const day=Math.floor(diff/86400000),hr=Math.floor(diff/3600000)%24,min=Math.floor(diff/60000)%60;
-  $('milestone-value').textContent=`${String(day).padStart(2,'0')}D ${String(hr).padStart(2,'0')}H ${String(min).padStart(2,'0')}M`;
-}
-function sizeCanvases(){
-  displayW=Math.max(1,window.innerWidth);displayH=Math.max(1,window.innerHeight);dpr=Math.min(window.devicePixelRatio||1,1.5);
-  rainCanvas.width=Math.floor(displayW*dpr);rainCanvas.height=Math.floor(displayH*dpr);rainCtx.setTransform(dpr,0,0,dpr,0,0);
-  const r=spectrumCanvas.getBoundingClientRect();spectrumCanvas.width=Math.max(1,Math.floor(r.width*dpr));spectrumCanvas.height=Math.max(1,Math.floor(r.height*dpr));spectrumCtx.setTransform(dpr,0,0,dpr,0,0);
-  resetRain();
-}
-function resetRain(){
-  const amount=settings.rain && !settings.reducedMotion && !reduceUserMotion?Number(settings.rainAmount):0;
-  const count=Math.min(160,Math.floor(displayW*displayH/12000 * amount/55));
-  drops=Array.from({length:count},()=>({x:Math.random()*displayW,y:Math.random()*displayH,speed:120+Math.random()*290,len:7+Math.random()*17,alpha:.09+Math.random()*.16,width:Math.random()<.14?1.2:.65}));
-}
-function drawRain(delta){
-  rainCtx.clearRect(0,0,displayW,displayH);
-  if(!settings.rain||settings.reducedMotion||reduceUserMotion)return;
-  for(const r of drops){
-    r.y+=r.speed*delta;r.x-=r.speed*delta*.12;
-    if(r.y>displayH+25){r.y=-30;r.x=Math.random()*(displayW+70);}
-    if(r.x<-20)r.x=displayW+20;
-    rainCtx.beginPath();rainCtx.moveTo(r.x,r.y);rainCtx.lineTo(r.x-2,r.y+r.len);rainCtx.lineWidth=r.width;
-    rainCtx.strokeStyle=`rgba(165,196,255,${r.alpha})`;rainCtx.stroke();
-  }
-}
-function drawSpectrum(){
-  const bounds=spectrumCanvas.getBoundingClientRect(),w=bounds.width,h=bounds.height;if(!w||!h)return;
-  spectrumCtx.clearRect(0,0,w,h);
-  const recent=Date.now()-lastAudioAt<2000;
-  const bands=40,gap=3,barWidth=Math.max(2,(w-(bands-1)*gap)/bands);
-  for(let i=0;i<bands;i++){
-    const source=Math.floor(i*64/bands),next=Math.min(63,source+1);
-    const level=recent?Math.min(1,Math.max(0,(audioLevels[source]+audioLevels[next])/2)):0;
-    smoothed[i]+=(level-smoothed[i])*(recent?.28:.13);
-    const v=smoothed[i],height=Math.max(2,Math.pow(v,.65)*(h-4));
-    const x=i*(barWidth+gap),y=h-height;
-    spectrumCtx.fillStyle=v>.5?'rgba(236,159,255,.94)':'rgba(159,119,224,.76)';
-    spectrumCtx.fillRect(x,y,barWidth,height);
-    if(v>.08){spectrumCtx.fillStyle='rgba(97,231,219,.72)';spectrumCtx.fillRect(x,y,barWidth,Math.min(2,height));}
-  }
-  if(!recent&&!hasMedia){$('audio-text').textContent='AUDIO REACTIVE / IDLE';}
-  else{$('audio-text').textContent='AUDIO REACTIVE / WALLPAPER ENGINE';}
-}
-function loop(now){
-  requestAnimationFrame(loop);
-  if(paused||document.hidden)return;
-  const interval=1000/Math.max(1,fpsLimit);
-  if(now-lastFrame<interval)return;
-  const delta=Math.min(.08,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
-  drawRain(delta);if(settings.music)drawSpectrum();
-}
+  const $ = id => document.getElementById(id);
+  const rainCanvas = $('rain');
+  const spectrumCanvas = $('spectrum');
+  const rainCtx = rainCanvas.getContext('2d', {alpha: true});
+  const spectrumCtx = spectrumCanvas.getContext('2d', {alpha: true});
+  const motionPreference = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const settings = {
+    rain: true, rainAmount: 68, hud: true, calendar: true,
+    projects: true, music: true, scanlines: true, reducedMotion: false,
+    panelScale: 108, audioSensitivity: 110, diagnostics: false,
+    milestoneDate: '', milestoneName: 'MILESTONE'
+  };
 
-// Wallpaper Engine callbacks are registered at script evaluation time, not onload.
-window.wallpaperPropertyListener={
-  applyGeneralProperties:function(props){if(typeof props.fps==='number')fpsLimit=Math.max(1,Math.min(30,Math.floor(props.fps)));},
-  setPaused:function(value){paused=!!value;},
-  applyUserProperties:function(props){
-    const keys={showrain:'rain',rainamount:'rainAmount',showhud:'hud',showcalendar:'calendar',showprojects:'projects',showmusic:'music',showscanlines:'scanlines',reducedmotion:'reducedMotion',milestonedate:'milestoneDate',milestonename:'milestoneName'};
-    Object.keys(keys).forEach(key=>{if(props[key] && Object.prototype.hasOwnProperty.call(props[key],'value'))settings[keys[key]]=props[key].value;});
-    classSettings();
-  }
-};
-function audioListener(audio){
-  lastAudioAt=Date.now();
-  for(let i=0;i<64;i++)audioLevels[i]=Math.min(1,Math.max(0,((Number(audio[i])||0)+(Number(audio[i+64])||0))/2));
-}
-function mediaProperties(event){
-  if(!event)return;hasMedia=!!(event.title||event.artist);
-  $('music-track').textContent=event.title||'UNTITLED TRACK';
-  $('music-artist').textContent=event.artist||event.albumArtist||'UNKNOWN ARTIST';
-  $('music-state').textContent='MEDIA SESSION CONNECTED';
-}
-function mediaThumbnail(event){if(!event)return;const art=$('album');if(event.thumbnail){art.src=event.thumbnail;art.hidden=false;$('album-placeholder').hidden=true;}else{art.hidden=true;$('album-placeholder').hidden=false;}}
-function mediaPlayback(event){
-  if(!event)return;
-  const playback=window.wallpaperMediaIntegration||{};
-  if(event.state===playback.PLAYBACK_PLAYING)$('music-state').textContent='NOW PLAYING';
-  else if(event.state===playback.PLAYBACK_PAUSED)$('music-state').textContent='PAUSED';
-  else if(event.state===playback.PLAYBACK_STOPPED)$('music-state').textContent='STOPPED';
-}
-function mediaStatus(event){if(event && event.enabled===false)$('music-state').textContent='ENABLE MEDIA INTEGRATION';}
-if(typeof window.wallpaperRegisterAudioListener==='function')window.wallpaperRegisterAudioListener(audioListener);
-if(typeof window.wallpaperRegisterMediaPropertiesListener==='function')window.wallpaperRegisterMediaPropertiesListener(mediaProperties);
-if(typeof window.wallpaperRegisterMediaThumbnailListener==='function')window.wallpaperRegisterMediaThumbnailListener(mediaThumbnail);
-if(typeof window.wallpaperRegisterMediaPlaybackListener==='function')window.wallpaperRegisterMediaPlaybackListener(mediaPlayback);
-if(typeof window.wallpaperRegisterMediaStatusListener==='function')window.wallpaperRegisterMediaStatusListener(mediaStatus);
+  let width = 1, height = 1, dpr = 1, rainDrops = [], paused = false;
+  let renderFpsCap = 30, previousFrame = 0, drawnFrames = 0, renderFps = 0;
+  let fpsMeasuredAt = performance.now();
+  const audioLevels = new Float32Array(64);
+  const filteredBars = new Float32Array(40);
+  let registeredAudio = false;
+  let audioCallbacks = 0, lastAudioAt = -Infinity, audioPeak = 0;
+  let hasMedia = false, lastAudioUiAt = 0, lastDiagAt = 0;
+  let previousCalendarDay = '';
+  const reducedMotion = () => settings.reducedMotion || motionPreference;
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-window.addEventListener('resize',sizeCanvases,{passive:true});
-window.addEventListener('visibilitychange',()=>{lastFrame=performance.now();});
-sizeCanvases();classSettings();updateClocks();setInterval(updateClocks,1000);
-requestAnimationFrame(loop);
+  function applySettings() {
+    document.body.classList.toggle('cinematic', !settings.hud);
+    document.body.classList.toggle('no-rain', !settings.rain);
+    document.body.classList.toggle('no-calendar', !settings.calendar);
+    document.body.classList.toggle('no-project', !settings.projects);
+    document.body.classList.toggle('no-music', !settings.music);
+    document.body.classList.toggle('no-scan', !settings.scanlines);
+    document.body.classList.toggle('low-motion', reducedMotion());
+    document.documentElement.style.setProperty('--panel-scale', String(clamp(settings.panelScale, 90, 120) / 100));
+    $('diagnostics').hidden = !settings.diagnostics;
+    $('rain').style.display = (settings.rain && !reducedMotion()) ? '' : 'none';
+    updateMilestone();
+    resizeSpectrum();
+    makeRain();
+    reportDiagnostics(performance.now());
+  }
+
+  // Real live clocks, with DST handled by IANA zones rather than fixed offsets.
+  function clockText(zone) {
+    const date = new Date();
+    return {
+      time: new Intl.DateTimeFormat('en-GB', {
+        timeZone: zone, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+      }).format(date),
+      date: new Intl.DateTimeFormat('en-GB', {
+        timeZone: zone, day: '2-digit', month: 'short', year: 'numeric'
+      }).format(date)
+    };
+  }
+  function updateClocks() {
+    function update(zone, clockId, dateId) {
+      const v = clockText(zone);
+      const timeParts = v.time.split(':');
+      // Only a fixed-format clock string is interpolated; no external markup.
+      $(clockId).innerHTML = timeParts[0] + ':' + timeParts[1] + '<small>:' + timeParts[2] + '</small>';
+      $(dateId).textContent = v.date.toUpperCase();
+    }
+    update('Europe/London', 'time-uk', 'date-uk');
+    update('Asia/Hong_Kong', 'time-hk', 'date-hk');
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    const part = type => Number(parts.find(p => p.type === type).value);
+    const year = part('year'), month = part('month'), day = part('day');
+    const key = [year, month, day].join('-');
+    if (previousCalendarDay !== key) {
+      previousCalendarDay = key;
+      renderCalendar(year, month, day);
+    }
+    updateMilestone();
+  }
+  function renderCalendar(year, month, day) {
+    const name = new Intl.DateTimeFormat('en-GB', {month: 'long', timeZone: 'UTC'})
+      .format(new Date(Date.UTC(year, month - 1, 1))).toUpperCase();
+    $('cal-month').textContent = name;
+    $('cal-year').textContent = String(year);
+    const grid = $('calendar-grid');
+    grid.replaceChildren();
+    ['M', 'T', 'W', 'T', 'F', 'S', 'S'].forEach(letter => {
+      const element = document.createElement('div');
+      element.className = 'dayhead';
+      element.textContent = letter;
+      grid.appendChild(element);
+    });
+    const offset = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+    const days = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    const cells = Math.ceil((offset + days) / 7) * 7;
+    for (let i = 0; i < cells; i++) {
+      const n = i - offset + 1;
+      const element = document.createElement('div');
+      element.className = 'date';
+      if (n < 1 || n > days) {
+        element.classList.add('outside');
+        element.textContent = '·';
+      } else {
+        element.textContent = String(n).padStart(2, '0');
+        if (n === day) element.classList.add('today');
+      }
+      grid.appendChild(element);
+    }
+    $('calendar-foot').textContent = `TODAY // ${String(day).padStart(2, '0')} ${name} ${year}`;
+  }
+  function updateMilestone() {
+    const box = $('milestone');
+    const date = String(settings.milestoneDate || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      box.hidden = true;
+      return;
+    }
+    const target = new Date(date + 'T00:00:00');
+    if (!Number.isFinite(target.getTime()) || target.getFullYear() !== Number(date.slice(0, 4)) ||
+        target.getMonth() + 1 !== Number(date.slice(5, 7)) || target.getDate() !== Number(date.slice(8, 10))) {
+      box.hidden = true;
+      return;
+    }
+    box.hidden = false;
+    $('milestone-name').textContent = String(settings.milestoneName || 'MILESTONE').slice(0, 40);
+    const difference = target.getTime() - Date.now();
+    if (difference <= 0) {
+      $('milestone-value').textContent = 'MILESTONE REACHED';
+    } else {
+      const days = Math.floor(difference / 86400000);
+      const hours = Math.floor(difference / 3600000) % 24;
+      const minutes = Math.floor(difference / 60000) % 60;
+      $('milestone-value').textContent = `${String(days).padStart(2, '0')}D ${String(hours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M`;
+    }
+  }
+
+  // Single full-screen transparent canvas, capped particles, cap DPR to 1.5.
+  function resizeRain() {
+    width = Math.max(1, window.innerWidth);
+    height = Math.max(1, window.innerHeight);
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    rainCanvas.width = Math.round(width * dpr);
+    rainCanvas.height = Math.round(height * dpr);
+    rainCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    makeRain();
+  }
+  function resizeSpectrum() {
+    const bounds = spectrumCanvas.getBoundingClientRect();
+    spectrumCanvas.width = Math.max(1, Math.round(bounds.width * dpr));
+    spectrumCanvas.height = Math.max(1, Math.round(bounds.height * dpr));
+    spectrumCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function makeRain() {
+    const density = settings.rain && !reducedMotion() ? clamp(Number(settings.rainAmount), 0, 100) / 100 : 0;
+    const count = Math.min(240, Math.round((width * height / 8200) * density));
+    rainDrops = Array.from({length: count}, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      speed: 260 + Math.random() * 340,
+      length: 12 + Math.random() * 19,
+      alpha: .16 + Math.random() * .24,
+      thickness: Math.random() < .19 ? 1.25 : .75,
+      shade: Math.random() < .15 ? '241,187,255' : '177,211,255'
+    }));
+  }
+  function paintRain(dt) {
+    rainCtx.clearRect(0, 0, width, height);
+    if (!settings.rain || reducedMotion()) return;
+    for (const drop of rainDrops) {
+      drop.x -= drop.speed * dt * .17;
+      drop.y += drop.speed * dt;
+      if (drop.y > height + 35) {
+        drop.y = -35;
+        drop.x = Math.random() * (width + 70);
+      }
+      if (drop.x < -35) drop.x = width + 35;
+      rainCtx.beginPath();
+      rainCtx.moveTo(drop.x, drop.y);
+      rainCtx.lineTo(drop.x - 3.6, drop.y + drop.length);
+      rainCtx.lineWidth = drop.thickness;
+      rainCtx.strokeStyle = `rgba(${drop.shade},${drop.alpha})`;
+      rainCtx.stroke();
+    }
+  }
+
+  // Audio callbacks are registered at top level, immediately after HTML exists.
+  // Received sample values are not substituted with a fake idle animation.
+  function audioListener(samples) {
+    if (!samples || samples.length < 128) return;
+    audioCallbacks++;
+    lastAudioAt = performance.now();
+    let peak = 0;
+    for (let i = 0; i < 64; i++) {
+      const left = Number(samples[i]) || 0;
+      const right = Number(samples[i + 64]) || 0;
+      const volume = clamp((Math.max(0, left) + Math.max(0, right)) / 2, 0, 1);
+      audioLevels[i] = volume;
+      if (volume > peak) peak = volume;
+    }
+    audioPeak = peak;
+  }
+  function audioMode(now) {
+    if (!registeredAudio) return 'unavailable';
+    if (now - lastAudioAt >= 2400) return 'waiting';
+    return audioPeak > .003 ? 'active' : 'quiet';
+  }
+  function paintSpectrum(now) {
+    const bounds = spectrumCanvas.getBoundingClientRect();
+    const w = bounds.width, h = bounds.height;
+    if (!w || !h) return;
+    spectrumCtx.clearRect(0, 0, w, h);
+    const mode = audioMode(now);
+    const bandCount = filteredBars.length;
+    const gap = w < 310 ? 2 : 3;
+    const barWidth = (w - gap * (bandCount - 1)) / bandCount;
+    const gain = clamp(settings.audioSensitivity / 100, .25, 2) * 3;
+    for (let i = 0; i < bandCount; i++) {
+      const idx = Math.floor(i * 64 / bandCount);
+      const next = Math.min(63, idx + 1);
+      const raw = mode === 'active' ? (audioLevels[idx] + audioLevels[next]) / 2 : 0;
+      const scaled = clamp(Math.sqrt(raw * gain), 0, 1);
+      const current = filteredBars[i];
+      const speed = scaled > current ? .48 : .15;
+      filteredBars[i] += (scaled - current) * speed;
+      const value = filteredBars[i];
+      const actualHeight = Math.max(2, value * (h - 3));
+      const x = i * (barWidth + gap), y = h - actualHeight;
+      spectrumCtx.fillStyle = value > .46 ? 'rgba(231,146,255,.97)' : 'rgba(170,124,234,.82)';
+      spectrumCtx.fillRect(x, y, Math.max(1, barWidth), actualHeight);
+      if (value > .10) {
+        spectrumCtx.fillStyle = 'rgba(103,235,220,.9)';
+        spectrumCtx.fillRect(x, y, Math.max(1, barWidth), 2);
+      }
+    }
+    if (now - lastAudioUiAt > 500) {
+      const indicator = $('audio-text');
+      if (mode === 'active') indicator.textContent = 'AUDIO INPUT // LIVE';
+      else if (mode === 'quiet') indicator.textContent = 'AUDIO INPUT // QUIET';
+      else if (mode === 'waiting') indicator.textContent = 'AUDIO INPUT // WAITING';
+      else indicator.textContent = 'AUDIO INPUT // WALLPAPER ENGINE ONLY';
+      $('audio-pip').style.background = mode === 'active' ? '#67ebdc' : '#d176ef';
+      lastAudioUiAt = now;
+    }
+  }
+
+  function reportDiagnostics(now) {
+    if (!settings.diagnostics) return;
+    const motion = reducedMotion() ? 'REDUCED' : paused ? 'PAUSED' : 'RUNNING';
+    $('diag-render').textContent = `MOTION: ${motion}  |  RAIN DROPS: ${rainDrops.length}  |  FPS: ${renderFps.toFixed(0)}`;
+    const mode = audioMode(now).toUpperCase();
+    const age = Number.isFinite(lastAudioAt) ? (now - lastAudioAt) / 1000 : null;
+    $('diag-audio').textContent = `AUDIO: ${mode}  |  CALLBACKS: ${audioCallbacks}  |  PEAK: ${audioPeak.toFixed(3)}  |  LAST: ${age === null ? 'NEVER' : age.toFixed(1) + 's'}`;
+  }
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (paused || document.hidden) {
+      previousFrame = now;
+      return;
+    }
+    const delay = 1000 / renderFpsCap;
+    if (now - previousFrame < delay) return;
+    const dt = clamp((now - previousFrame) / 1000, 0, .075);
+    previousFrame = now;
+    paintRain(dt);
+    if (settings.music) paintSpectrum(now);
+    drawnFrames++;
+    if (now - fpsMeasuredAt > 1050) {
+      renderFps = drawnFrames * 1000 / (now - fpsMeasuredAt);
+      drawnFrames = 0;
+      fpsMeasuredAt = now;
+    }
+    if (settings.diagnostics && now - lastDiagAt > 480) {
+      reportDiagnostics(now);
+      lastDiagAt = now;
+    }
+  }
+
+  function mediaProperties(event) {
+    if (!event) return;
+    hasMedia = !!(event.title || event.artist);
+    $('music-track').textContent = event.title || 'UNTITLED TRACK';
+    $('music-artist').textContent = event.artist || event.albumArtist || 'UNKNOWN ARTIST';
+    $('music-state').textContent = hasMedia ? 'MEDIA SESSION CONNECTED' : 'AWAITING MEDIA SESSION';
+  }
+  function mediaThumbnail(event) {
+    if (!event) return;
+    const image = $('album');
+    if (event.thumbnail) {
+      image.src = event.thumbnail; // supplied by Wallpaper Engine's Windows media integration
+      image.hidden = false;
+      $('album-placeholder').hidden = true;
+    } else {
+      image.removeAttribute('src');
+      image.hidden = true;
+      $('album-placeholder').hidden = false;
+    }
+  }
+  function mediaPlayback(event) {
+    if (!event) return;
+    const integration = window.wallpaperMediaIntegration || {};
+    if (event.state === integration.PLAYBACK_PLAYING) $('music-state').textContent = 'NOW PLAYING';
+    else if (event.state === integration.PLAYBACK_PAUSED) $('music-state').textContent = 'PAUSED';
+    else if (event.state === integration.PLAYBACK_STOPPED) $('music-state').textContent = 'STOPPED';
+  }
+  function mediaStatus(event) {
+    if (event && event.enabled === false) $('music-state').textContent = 'MEDIA INTEGRATION DISABLED';
+  }
+
+  window.wallpaperPropertyListener = {
+    applyGeneralProperties: function (props) {
+      if (Number(props.fps) > 0) renderFpsCap = clamp(Math.floor(Number(props.fps)), 1, 30);
+    },
+    setPaused: function (value) {
+      paused = !!value;
+      document.body.classList.toggle('paused', paused);
+      previousFrame = performance.now();
+      reportDiagnostics(previousFrame);
+    },
+    applyUserProperties: function (props) {
+      const map = {
+        showrain: 'rain', rainamount: 'rainAmount', showhud: 'hud',
+        showcalendar: 'calendar', showprojects: 'projects', showmusic: 'music',
+        showscanlines: 'scanlines', reducedmotion: 'reducedMotion',
+        uiscale: 'panelScale', audiosensitivity: 'audioSensitivity',
+        showdiagnostics: 'diagnostics',
+        milestonedate: 'milestoneDate', milestonename: 'milestoneName'
+      };
+      Object.keys(map).forEach(key => {
+        if (props[key] && Object.prototype.hasOwnProperty.call(props[key], 'value')) {
+          settings[map[key]] = props[key].value;
+        }
+      });
+      applySettings();
+    }
+  };
+
+  // DO NOT move these registrations into onload / setTimeout.
+  // Wallpaper Engine detects audio usage when the wallpaper starts.
+  if (typeof window.wallpaperRegisterAudioListener === 'function') {
+    window.wallpaperRegisterAudioListener(audioListener);
+    registeredAudio = true;
+  }
+  if (typeof window.wallpaperRegisterMediaPropertiesListener === 'function') window.wallpaperRegisterMediaPropertiesListener(mediaProperties);
+  if (typeof window.wallpaperRegisterMediaThumbnailListener === 'function') window.wallpaperRegisterMediaThumbnailListener(mediaThumbnail);
+  if (typeof window.wallpaperRegisterMediaPlaybackListener === 'function') window.wallpaperRegisterMediaPlaybackListener(mediaPlayback);
+  if (typeof window.wallpaperRegisterMediaStatusListener === 'function') window.wallpaperRegisterMediaStatusListener(mediaStatus);
+
+  let resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {resizeRain(); resizeSpectrum();}, 120);
+  }, {passive: true});
+  window.addEventListener('visibilitychange', () => {previousFrame = performance.now();});
+  resizeRain();
+  resizeSpectrum();
+  applySettings();
+  updateClocks();
+  setInterval(updateClocks, 1000);
+  requestAnimationFrame(frame);
 })();

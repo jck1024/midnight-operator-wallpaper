@@ -1,0 +1,47 @@
+MIDNIGHT OPERATOR v0.2 — TEST / ACCEPTANCE CHECKLIST
+====================================================
+Mark [PASS], [FAIL], or [NOT TESTED]. Include screenshots for any failures.
+
+INSTALL / DISPLAY
+[ ] New v0.2 imports separately; v0.1 still appears in Installed.
+[ ] Artwork appears; panels do not overlap or clip on your laptop display.
+[ ] World Clock is more readable than v0.1.
+[ ] Now Playing title, art and spectrum are more readable than v0.1.
+[ ] Calendar dates are more readable than v0.1.
+
+SPOTIFY AUDIO
+[ ] Song title/artist/album art update when Spotify changes tracks.
+[ ] With Spotify playing, visualiser bars move with actual sound.
+[ ] Diagnostics reads ACTIVE and callback count increases during playback.
+[ ] With Spotify silent/paused, bars return to baseline.
+[ ] Spectrum sensitivity changes bar response without changing volume.
+[ ] If not working, record diagnostics status (WAITING/QUIET/etc) and audio
+    recording device selected in Wallpaper Engine.
+
+ANIMATION / USER SETTINGS
+[ ] Rain is clearly visible and moves over the city.
+[ ] Changing Rain intensity 0 -> 100 visibly changes rainfall.
+[ ] Fog moves over ~20 seconds; subtle city camera drift is visible over ~1 min.
+[ ] A train light pass can be seen over ~13 seconds along the distant rail.
+[ ] Neon lighting subtly pulses over ~8 seconds.
+[ ] Reduced Motion disables rain and the moving scene effects.
+[ ] Hiding HUD switches to clean cinematic view.
+[ ] Other individual panel toggles work (calendar, projects, music).
+[ ] Dashboard size slider changes clock/music/calendar sizing.
+[ ] Settings persist after Wallpaper Engine restart.
+[ ] Countdown shows correct time when enabled with a valid future date.
+
+PERFORMANCE / RELIABILITY
+[ ] CPU, GPU and RAM remain acceptable versus your v0.1 baseline.
+[ ] No unexpected extra fan noise/heat after 10-20 minutes.
+[ ] Wallpaper pauses/stops correctly on fullscreen games and VirtualBox.
+[ ] Battery pause/stop policy behaves as you configured it.
+[ ] Wallpaper resumes after sleep/wake.
+[ ] No major render glitches on your normal display resolution.
+
+DIAGNOSTICS NOTES
+Record actual CPU %, GPU %, and MB used if possible.
+Report: Wallpaper Engine version, screen resolution, Spotify app/browser,
+which audio output device you use and diagnostics ACTIVE/QUIET/WAITING.
+
+Rollback: Select Midnight Operator v0.1 in Installed if v0.2 behaves worse.

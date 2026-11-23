@@ -1,0 +1,27 @@
+MIDNIGHT OPERATOR v0.2 — BROWSER TEST REPORT
+============================================
+Build date: 2026-11-22
+
+Verified in headless Chromium using a local test harness:
+- HTML, CSS and JavaScript loaded without page JavaScript exceptions.
+- project.json parsed as JSON; script.js passed Node's syntax check.
+- Rendering: 1920x1080, 1650x927, 1366x768, 1280x720, 1024x768.
+- None of the six main layout blocks overflowed at default panel scale.
+- 120% UI scale did not overlap the footer at tested 16:9 screen sizes.
+- Synthetic 128-value Wallpaper Engine audio arrays drove ACTIVE state and
+  updated the visualiser; simulated metadata changed the song title.
+- Foreground rain canvas contained visible drawn pixels that changed.
+- CSS fog transforms changed over time.
+- Reduced Motion hid rain and the train and stopped moving scene effects.
+- Individual dashboard toggle CSS, pause animation state, countdown
+  visibility and cinematic-mode logic operated as intended.
+
+NOT YET VERIFIED (requires a real Windows Wallpaper Engine installation):
+- Audio callback delivery from Spotify via Wallpaper Engine.
+- Recording device choice and reliability with the user's Windows audio stack.
+- True Windows media metadata and artwork after importing this release.
+- Persistence of properties after Wallpaper Engine restarts.
+- Real sustained resource use, sleep/wake and fullscreen performance on laptop.
+
+The browser test mocks are NOT included in the production wallpaper files.
+Diagnostic overlay shows true received callbacks in the installed wallpaper.

@@ -1,0 +1,14 @@
+MIDNIGHT OPERATOR CHANGELOG
+===========================
+0.2.0 — Motion & Audio Repair (2026-11-22)
+- Moved supportsaudioprocessing into project.json.general.
+- Strengthened canvas rainfall, animated haze, rail lights and neon pulse.
+- Improved audio gain/smoothing and added real-signal troubleshooting UI.
+- Enlarged World Clock / Now Playing / Calendar; introduced size slider.
+- Capped rainfall and canvas DPI, respected Wallpaper Engine FPS setting.
+- Strengthened Reduced Motion and paused animation behaviour.
+- Updated local guide and acceptance tests.
+
+0.1.0 — Initial Night Shift prototype
+- Original city scene and live widgets.
+- Music integration, rain, project chips and basic customisation.

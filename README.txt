@@ -1,62 +1,98 @@
-MIDNIGHT OPERATOR — Wallpaper Engine / Version 0.1.0
-===================================================
+MIDNIGHT OPERATOR v0.2.0 — Motion & Audio Repair
+===============================================
 
-WHAT THIS IS
-A standalone, animated WEB wallpaper, written in HTML, CSS and JavaScript.
-Designed for Wallpaper Engine on Windows. Works offline; no dependencies,
-third-party scripts, requests to online services, or bundled music.
+A separate, complete Wallpaper Engine WEB wallpaper project for Windows.
+This ZIP does not modify or require Midnight Operator v0.1.
 
-INSTALL IN WALLPAPER ENGINE
-1. Extract the entire ZIP somewhere permanent, such as:
-   C:\Users\<you>\Documents\MidnightOperator\
-2. Open Wallpaper Engine > Wallpaper Editor / Create Wallpaper.
-3. Drag index.html from this extracted folder onto "Create Wallpaper".
-4. Wallpaper Engine imports a copy of the whole project. Save the wallpaper.
-5. Return to Installed wallpapers and select "Midnight Operator".
+INSTALL WITHOUT OVERWRITING v0.1
+---------------------------------
+1. Leave v0.1 installed as your fallback.
+2. Extract THIS ZIP to a new folder, for example:
+   Documents\WallpaperProjects\MidnightOperator_v0.2\
+3. Open Wallpaper Engine on Windows > Wallpaper Editor / Create Wallpaper.
+4. Drag the extracted v0.2 INDEX.HTML onto Create Wallpaper.
+   DO NOT import the ZIP or preview JPG. Do not drag an older v0.1 file.
+5. Use a DIFFERENT title: "Midnight Operator v0.2 - Motion & Audio Repair".
+6. Save in the editor, return to Installed, and apply the new wallpaper.
+7. Keep v0.1 available as a rollback; switch wallpapers if needed.
 
-   NOTE: Import index.html, NOT the zip file or the static jpg.
-   Keep index.html, style.css, script.js, assets/ together in their folder.
-
-WHAT MOVES / WHAT'S LIVE
-* Animated rainfall, slow camera drift, haze, and passing train lights.
-* Real current UK (Europe/London) and Hong Kong times; UK monthly calendar.
-* 40-band audio-reactive spectrum, via Wallpaper Engine audio API.
-* Track title/artist/album art from Wallpaper Engine media integration
-  when the music player and app settings support it.
-* Optional custom date countdown (default off).
-* Project names are decorative labels, not live GitHub/project tracking.
-* No real CPU, RAM, security logs, or network-status claims.
+WHAT CHANGED SINCE v0.1
+-----------------------
+- Correct audio capture declaration: general.supportsaudioprocessing = true.
+- Kept immediate Wallpaper Engine audio listener registration.
+- Responsive REAL audio spectrum with adjustable sensitivity (no fake audio).
+- Optional true-state diagnostics for CALLBACKS / PEAK / LAST audio sample.
+- More visible foreground rainfall, fog drift, neon pulse and rail light motion.
+- Larger clock, Now Playing cover/text/spectrum, calendar labels and dates.
+- Dashboard scale from 90%-120%; default 108%.
+- Wallpaper Engine FPS limit honoured, capped at 30 FPS; capped rain particles.
+- Reduced Motion now disables rain, camera drift, rail movement and neon pulse.
+- Improved matching of CSS and canvas pause behaviour.
 
 CUSTOMISE
-Select wallpaper > Properties to toggle rain/HUD/calendar/music/projects,
-change rain intensity, enable Reduced motion, and supply an optional
-countdown (YYYY-MM-DD) and label.
+---------
+Select the v0.2 wallpaper > Properties:
+  Rain animation, Rain intensity (0-100)
+  Dashboard / cinematic, Show calendar, Show workspace, Show Now Playing
+  Key dashboard text / artwork size (90%-120%)
+  Audio visualiser sensitivity (25%-200%)
+  Scanlines, Reduced motion, Show diagnostics
+  Optional countdown date (YYYY-MM-DD) and label
 
-For a plain image you can use in Brave, see Brave_Companion_Wallpaper.jpg.
+AUDIO TEST — SPOTIFY
+--------------------
+1. Play music via Spotify. Confirm song title/artwork are visible.
+2. Enable "Show diagnostics" in wallpaper Properties.
+3. In diagnostic overlay, check AUDIO:
+    ACTIVE   = real non-zero audio samples received; spectrum should move.
+    QUIET    = audio callbacks are arriving, but current peak is near zero.
+    WAITING  = audio listener registered, no recent samples arrived.
+    UNAVAILABLE = Wallpaper Engine audio API not registered, e.g. browser preview.
+4. If WAITING persists while Spotify is audibly playing:
+   a) In Wallpaper Engine, check the audio recording/output device settings.
+   b) Try another known-working audio-reactive Wallpaper Engine wallpaper.
+   c) In the editor Save the project; close and relaunch its wallpaper.
+   d) Editor > Edit > Open in Explorer > project.json:
+      confirm the "general" object includes "supportsaudioprocessing": true.
+5. If ACTIVE but bars look small, raise Audio visualiser sensitivity.
+6. Turn diagnostics OFF after testing.
 
-PERFORMANCE
-Frame limiter is automatically capped to 30 FPS and respects lower
-limits set by Wallpaper Engine. Start at 15-30 FPS. In Wallpaper Engine's
-Performance/Playback settings set full-screen programs to Stop/Free memory,
-and pause wallpapers when running on battery if you prefer.
+Audio spectrum and media track metadata are INDEPENDENT. A correct song title
+is not proof that Wallpaper Engine has sent sound samples. This wallpaper
+cannot receive Windows system audio inside a regular browser preview.
 
-MEDIA NOTES
-Album art and track metadata are NOT guaranteed for every program. They
-require supported Windows media-session information and Wallpaper Engine
-media integration to be enabled. The visualiser requires Wallpaper Engine
-running with supported audio capture; opening index.html in a normal browser
-will display the wallpaper but cannot read system audio or music details.
+PERFORMANCE / BATTERY
+---------------------
+Test at 15 or 30 FPS in Wallpaper Engine Settings > Performance.
+Use Other application fullscreen: Stop (free memory) for demanding games.
+Consider Pause or Stop on battery; keep existing settings if they work well.
+An integrated-GPU laptop should be evaluated with Task Manager for real
+CPU / GPU / RAM changes versus v0.1. Results depend on the device.
 
-EDITING
-You own these HTML/CSS/JS source files. Change panel text in index.html,
-colours in style.css, animation and logic in script.js. Wallpaper Engine
-copies files when importing. To modify the installed copy, use the editor's
-Edit > Open in Explorer, then save/reload it.
+ANIMATION NOTE
+--------------
+The city/desk is one static image. Only rain, glow/fog, camera drift and train
+lights are animated overlays. The train lights are a stylised overlay and may
+not match every pixel of the distant train in the background artwork.
 
-STATUS
-This is a locally generated prototype. Browser rendering and syntax have
-been checked, but playback inside your actual Wallpaper Engine installation
-has not been tested here.
+DATA / PRIVACY
+--------------
+Offline and local. No external JavaScript, trackers, web services or ads.
+The project names are decorative. It does not read CPU, RAM, security logs,
+GitHub or personal files. Media metadata is from Wallpaper Engine only.
 
-Wallpaper Engine official guide:
-https://docs.wallpaperengine.io/en/web/first/gettingstarted.html
+TESTING STATUS
+--------------
+- JavaScript/JSON syntax and browser preview were checked in an offline
+  Chromium test harness using STUBBED audio and media callbacks.
+- Tested at 1920x1080, 1650x927, 1366x768, 1280x720, 1024x768.
+- Actual Spotify capture, Windows media integration and Wallpaper Engine
+  performance remain UNVERIFIED until you test on your own machine.
+- See TESTING_CHECKLIST.txt for acceptance tests.
+
+OFFICIAL WALLPAPER ENGINE DOCUMENTATION
+---------------------------------------
+Import: https://docs.wallpaperengine.io/en/web/first/gettingstarted.html
+Audio: https://docs.wallpaperengine.io/en/web/audio/visualizer.html
+Media: https://docs.wallpaperengine.io/en/web/audio/media.html
+FPS: https://docs.wallpaperengine.io/en/web/performance/fps.html
